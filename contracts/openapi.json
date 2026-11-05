@@ -825,6 +825,469 @@
           "Inventario"
         ]
       }
+    },
+    "/customers": {
+      "get": {
+        "operationId": "CustomersController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Búsqueda por nombre, teléfono E.164 o correo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar clientes CRM con búsqueda, filtro por etiquetas y paginación",
+        "tags": [
+          "Clientes CRM"
+        ]
+      },
+      "post": {
+        "operationId": "CustomersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cliente creado"
+          },
+          "409": {
+            "description": "El número de teléfono ya se encuentra registrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Registrar nuevo cliente con normalización E.164 (+57)",
+        "tags": [
+          "Clientes CRM"
+        ]
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "operationId": "CustomersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener ficha CRM del cliente con historial de pedidos y conversaciones",
+        "tags": [
+          "Clientes CRM"
+        ]
+      },
+      "put": {
+        "operationId": "CustomersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Actualizar información o etiquetas de un cliente",
+        "tags": [
+          "Clientes CRM"
+        ]
+      }
+    },
+    "/customers/{id}/addresses": {
+      "post": {
+        "operationId": "CustomersController_addAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Agregar nueva dirección de entrega para el cliente",
+        "tags": [
+          "Clientes CRM"
+        ]
+      }
+    },
+    "/orders": {
+      "get": {
+        "operationId": "OrdersController_findAll",
+        "parameters": [
+          {
+            "name": "statusId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Número de pedido SH-YYYY-XXXX o nombre/teléfono del cliente",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar pedidos con filtrado por estado, cliente o búsqueda",
+        "tags": [
+          "Pedidos"
+        ]
+      },
+      "post": {
+        "operationId": "OrdersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pedido creado exitosamente"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear nuevo pedido comercial con snapshots inmutables de precio y costo (CPP)",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "operationId": "OrdersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Consultar detalle completo de un pedido, ítems, historial y pagos",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/orders/{id}/status": {
+      "patch": {
+        "operationId": "OrdersController_changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeOrderStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado actualizado"
+          },
+          "400": {
+            "description": "Transición de estado inválida o stock insuficiente"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Avanzar o cambiar el estado del pedido validando la máquina de estados y coordinando reservas/despacho de inventario",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/payments/methods": {
+      "get": {
+        "operationId": "PaymentsController_getMethods",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar métodos de pago activos (Nequi, Daviplata, Efectivo, Transferencia, Contra entrega)",
+        "tags": [
+          "Pagos"
+        ]
+      }
+    },
+    "/payments/order/{orderId}": {
+      "get": {
+        "operationId": "PaymentsController_getPaymentsByOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Consultar historial de pagos y abonos de un pedido",
+        "tags": [
+          "Pagos"
+        ]
+      }
+    },
+    "/payments": {
+      "post": {
+        "operationId": "PaymentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pago registrado en estado PENDING"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Registrar abono o pago a un pedido",
+        "tags": [
+          "Pagos"
+        ]
+      }
+    },
+    "/payments/{id}/confirm": {
+      "patch": {
+        "operationId": "PaymentsController_confirmPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pago confirmado exitosamente"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Confirmar pago, generar transacción financiera de ingreso y avanzar pedido si se cubre el 100%",
+        "tags": [
+          "Pagos"
+        ]
+      }
     }
   },
   "info": {
@@ -1311,6 +1774,232 @@
           "variantId",
           "type",
           "quantity"
+        ]
+      },
+      "CreateCustomerAddressDto": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "example": "Calle 100 # 15-20"
+          },
+          "detail": {
+            "type": "string",
+            "example": "Apto 402, Torre B"
+          },
+          "city": {
+            "type": "string",
+            "example": "Bogotá"
+          },
+          "state": {
+            "type": "string",
+            "example": "Cundinamarca"
+          },
+          "country": {
+            "type": "string",
+            "example": "Colombia",
+            "default": "Colombia"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "110111"
+          }
+        },
+        "required": [
+          "street",
+          "city",
+          "state",
+          "country"
+        ]
+      },
+      "CreateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Mariana"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rodríguez"
+          },
+          "phone": {
+            "type": "string",
+            "example": "3001234567",
+            "description": "Teléfono del cliente. Se normaliza automáticamente a E.164 (+573001234567)"
+          },
+          "email": {
+            "type": "string",
+            "example": "mariana.rodriguez@example.com"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Cliente frecuente de WhatsApp, prefiere despachos en la mañana"
+          },
+          "address": {
+            "$ref": "#/components/schemas/CreateCustomerAddressDto"
+          },
+          "tags": {
+            "example": [
+              "VIP",
+              "WhatsApp"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "firstName",
+          "phone"
+        ]
+      },
+      "UpdateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Mariana"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rodríguez"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+573001234567"
+          },
+          "email": {
+            "type": "string",
+            "example": "mariana.nuevo@example.com"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Notas actualizadas"
+          },
+          "tags": {
+            "example": [
+              "VIP",
+              "Recurrente"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "phone",
+          "email",
+          "notes"
+        ]
+      },
+      "CreateOrderItemDto": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          },
+          "customUnitPrice": {
+            "type": "number",
+            "example": 210000,
+            "description": "Precio unitario personalizado (opcional)"
+          }
+        },
+        "required": [
+          "variantId",
+          "quantity"
+        ]
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateOrderItemDto"
+            }
+          },
+          "discount": {
+            "type": "number",
+            "example": 0
+          },
+          "shippingCost": {
+            "type": "number",
+            "example": 15000
+          },
+          "notes": {
+            "type": "string",
+            "example": "Entregar en portería, avisar antes de llegar"
+          },
+          "conversationId": {
+            "type": "string",
+            "example": "c1d2e3f4-a5b6-7890-bcde-fa1234567890"
+          }
+        },
+        "required": [
+          "customerId",
+          "items"
+        ]
+      },
+      "ChangeOrderStatusDto": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "number",
+            "example": 3,
+            "description": "ID del nuevo estado del pedido (ej. 3 para Confirmado)"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Cliente confirmó el pedido por WhatsApp"
+          }
+        },
+        "required": [
+          "statusId"
+        ]
+      },
+      "CreatePaymentDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "methodId": {
+            "type": "string",
+            "example": "b1c2d3e4-f5a6-7890-bcde-fa1234567890"
+          },
+          "amount": {
+            "type": "number",
+            "example": 150000,
+            "description": "Monto pagado o abonado en COP"
+          },
+          "referenceNumber": {
+            "type": "string",
+            "example": "NEQUI-TRANS-9874521"
+          },
+          "voucherFileId": {
+            "type": "string",
+            "example": "c1d2e3f4-a5b6-7890-bcde-fa1234567890"
+          }
+        },
+        "required": [
+          "orderId",
+          "methodId",
+          "amount"
         ]
       }
     }

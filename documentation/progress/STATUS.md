@@ -2,32 +2,32 @@
 
 ## Información General
 
-- **Fase Actual:** FASE 3 — Productos e Inventario (COMPLETADA)
+- **Fase Actual:** FASE 4 — Clientes y Pedidos (COMPLETADA)
 - **Última Actualización:** 2026-11-04
 - **Branch Activo:** `main`
 
 ---
 
-## Tareas Realizadas (Fase 3)
+## Tareas Realizadas (Fase 4)
 
-- [x] Sincronización del contrato OpenAPI con los tipos actualizados de productos, categorías, marcas, almacenamiento e inventario (`src/shared/api/generated.ts`).
-- [x] Vista completa de Catálogo de Productos en `/products`:
-  - Barra de búsqueda por nombre y SKU.
-  - Filtrado por categoría y estado.
-  - Tabla con imágenes, precios de compra/venta, cálculo dinámico de margen (%) y badge de stock crítico.
-- [x] Vista completa de Control de Inventario y Kardex en `/inventory`:
-  - Tarjetas KPI: Valorización total de bodega (CPP en COP), total unidades en existencia, alertas de stock mínimo.
-  - Tabla histórica de Kardex con tipo de movimiento (Compra, Venta, Ajuste, Devolución), existencias previas/resultantes, costo unitario y operador.
-- [x] Pruebas unitarias de frontend con Vitest pasando al 100%.
-- [x] Compilación Next.js verificada exitosamente (7 páginas estáticas generadas).
+- [x] Sincronización del contrato OpenAPI con tipos de Clientes CRM, Pedidos, Transiciones y Pagos (`src/shared/api/generated.ts`).
+- [x] Vista completa de Clientes CRM en `/customers`:
+  - Listado con teléfonos E.164, direcciones predeterminadas, total gastado y etiquetas.
+  - Búsqueda en vivo y filtrado por tags.
+- [x] Vista completa de Gestión de Pedidos en `/orders`:
+  - Pestañas por estado comercial (Nuevos, Confirmados, En preparación, Enviados, Entregados).
+  - Listado con numeración `SH-YYYY-XXXX`, clientes, totales, estado del pedido (badges de color) y estado de cobro.
+  - Acciones rápidas de avance de estado según transiciones permitidas.
+- [x] Pruebas unitarias de Vitest pasando al 100%.
+- [x] Compilación Next.js verificada exitosamente (9 páginas estáticas generadas).
 
 ---
 
-## Tareas Pendientes (Próxima: Fase 4)
+## Tareas Pendientes (Próxima: Fase 5)
 
-- [ ] Vistas de Clientes CRM (`/customers`): directorio, historial de compras, etiquetas y direcciones.
-- [ ] Vistas de Pedidos (`/orders`): listado, vista Kanban por estado de pedido y detalle con trazabilidad.
-- [ ] Registro y confirmación de pagos y comprobantes.
+- [ ] Dashboard analítico con gráficas Recharts (ventas, ingresos vs. gastos, pedidos por estado).
+- [ ] Vistas de Finanzas y Egresos (`/finances`): registro de gastos operativos y métricas de rentabilidad.
+- [ ] Vista de Reportes (`/reports`) con descarga de archivos generados.
 
 ---
 

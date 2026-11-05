@@ -325,6 +325,179 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar clientes CRM con búsqueda, filtro por etiquetas y paginación */
+        get: operations["CustomersController_findAll"];
+        put?: never;
+        /** Registrar nuevo cliente con normalización E.164 (+57) */
+        post: operations["CustomersController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener ficha CRM del cliente con historial de pedidos y conversaciones */
+        get: operations["CustomersController_findOne"];
+        /** Actualizar información o etiquetas de un cliente */
+        put: operations["CustomersController_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/{id}/addresses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Agregar nueva dirección de entrega para el cliente */
+        post: operations["CustomersController_addAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar pedidos con filtrado por estado, cliente o búsqueda */
+        get: operations["OrdersController_findAll"];
+        put?: never;
+        /** Crear nuevo pedido comercial con snapshots inmutables de precio y costo (CPP) */
+        post: operations["OrdersController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultar detalle completo de un pedido, ítems, historial y pagos */
+        get: operations["OrdersController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Avanzar o cambiar el estado del pedido validando la máquina de estados y coordinando reservas/despacho de inventario */
+        patch: operations["OrdersController_changeStatus"];
+        trace?: never;
+    };
+    "/payments/methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar métodos de pago activos (Nequi, Daviplata, Efectivo, Transferencia, Contra entrega) */
+        get: operations["PaymentsController_getMethods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/order/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultar historial de pagos y abonos de un pedido */
+        get: operations["PaymentsController_getPaymentsByOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Registrar abono o pago a un pedido */
+        post: operations["PaymentsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Confirmar pago, generar transacción financiera de ingreso y avanzar pedido si se cubre el 100% */
+        patch: operations["PaymentsController_confirmPayment"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -533,6 +706,109 @@ export interface components {
             reason?: string;
             /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
             referenceId?: string;
+        };
+        CreateCustomerAddressDto: {
+            /** @example Calle 100 # 15-20 */
+            street: string;
+            /** @example Apto 402, Torre B */
+            detail?: string;
+            /** @example Bogotá */
+            city: string;
+            /** @example Cundinamarca */
+            state: string;
+            /**
+             * @default Colombia
+             * @example Colombia
+             */
+            country: string;
+            /** @example 110111 */
+            postalCode?: string;
+        };
+        CreateCustomerDto: {
+            /** @example Mariana */
+            firstName: string;
+            /** @example Rodríguez */
+            lastName?: string;
+            /**
+             * @description Teléfono del cliente. Se normaliza automáticamente a E.164 (+573001234567)
+             * @example 3001234567
+             */
+            phone: string;
+            /** @example mariana.rodriguez@example.com */
+            email?: string;
+            /** @example Cliente frecuente de WhatsApp, prefiere despachos en la mañana */
+            notes?: string;
+            address?: components["schemas"]["CreateCustomerAddressDto"];
+            /** @example [
+             *       "VIP",
+             *       "WhatsApp"
+             *     ] */
+            tags?: string[];
+        };
+        UpdateCustomerDto: {
+            /** @example Mariana */
+            firstName: string;
+            /** @example Rodríguez */
+            lastName: string;
+            /** @example +573001234567 */
+            phone: string;
+            /** @example mariana.nuevo@example.com */
+            email: string;
+            /** @example Notas actualizadas */
+            notes: string;
+            /** @example [
+             *       "VIP",
+             *       "Recurrente"
+             *     ] */
+            tags?: string[];
+        };
+        CreateOrderItemDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            variantId: string;
+            /** @example 2 */
+            quantity: number;
+            /**
+             * @description Precio unitario personalizado (opcional)
+             * @example 210000
+             */
+            customUnitPrice?: number;
+        };
+        CreateOrderDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            customerId: string;
+            items: components["schemas"]["CreateOrderItemDto"][];
+            /** @example 0 */
+            discount?: number;
+            /** @example 15000 */
+            shippingCost?: number;
+            /** @example Entregar en portería, avisar antes de llegar */
+            notes?: string;
+            /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
+            conversationId?: string;
+        };
+        ChangeOrderStatusDto: {
+            /**
+             * @description ID del nuevo estado del pedido (ej. 3 para Confirmado)
+             * @example 3
+             */
+            statusId: number;
+            /** @example Cliente confirmó el pedido por WhatsApp */
+            reason?: string;
+        };
+        CreatePaymentDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            orderId: string;
+            /** @example b1c2d3e4-f5a6-7890-bcde-fa1234567890 */
+            methodId: string;
+            /**
+             * @description Monto pagado o abonado en COP
+             * @example 150000
+             */
+            amount: number;
+            /** @example NEQUI-TRANS-9874521 */
+            referenceNumber?: string;
+            /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
+            voucherFileId?: string;
         };
     };
     responses: never;
@@ -1127,6 +1403,297 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomersController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Búsqueda por nombre, teléfono E.164 o correo */
+                search?: string;
+                tag?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomersController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCustomerDto"];
+            };
+        };
+        responses: {
+            /** @description Cliente creado */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El número de teléfono ya se encuentra registrado */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomersController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomersController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCustomerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomersController_addAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCustomerAddressDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_findAll: {
+        parameters: {
+            query?: {
+                statusId?: number;
+                customerId?: string;
+                /** @description Número de pedido SH-YYYY-XXXX o nombre/teléfono del cliente */
+                search?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Pedido creado exitosamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeOrderStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Estado actualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Transición de estado inválida o stock insuficiente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_getMethods: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_getPaymentsByOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePaymentDto"];
+            };
+        };
+        responses: {
+            /** @description Pago registrado en estado PENDING */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_confirmPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pago confirmado exitosamente */
             200: {
                 headers: {
                     [name: string]: unknown;
