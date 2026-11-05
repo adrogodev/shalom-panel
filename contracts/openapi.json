@@ -282,6 +282,549 @@
           "Usuarios"
         ]
       }
+    },
+    "/storage/upload": {
+      "post": {
+        "operationId": "StorageController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Archivo almacenado exitosamente"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Subir archivo (imágenes de catálogo o documentos privados) a MinIO / S3",
+        "tags": [
+          "Almacenamiento"
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de categorías"
+          }
+        },
+        "summary": "Listar todas las categorías del catálogo",
+        "tags": [
+          "Categorías"
+        ]
+      },
+      "post": {
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear nueva categoría",
+        "tags": [
+          "Categorías"
+        ]
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Obtener detalle de una categoría por su ID",
+        "tags": [
+          "Categorías"
+        ]
+      },
+      "put": {
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Actualizar categoría existente",
+        "tags": [
+          "Categorías"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Eliminar categoría (solo si no tiene productos asociados)",
+        "tags": [
+          "Categorías"
+        ]
+      }
+    },
+    "/brands": {
+      "get": {
+        "operationId": "BrandsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de marcas"
+          }
+        },
+        "summary": "Listar todas las marcas comerciales",
+        "tags": [
+          "Marcas"
+        ]
+      },
+      "post": {
+        "operationId": "BrandsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBrandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Registrar nueva marca",
+        "tags": [
+          "Marcas"
+        ]
+      }
+    },
+    "/brands/{id}": {
+      "delete": {
+        "operationId": "BrandsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Eliminar marca",
+        "tags": [
+          "Marcas"
+        ]
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "ProductsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Búsqueda por nombre o SKU",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ACTIVE",
+                "INACTIVE",
+                "ARCHIVED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Listar productos con filtros, cálculo de margen y existencias consolidadas",
+        "tags": [
+          "Productos"
+        ]
+      },
+      "post": {
+        "operationId": "ProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear nuevo producto con variantes y registro inicial en Kardex",
+        "tags": [
+          "Productos"
+        ]
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Obtener detalle completo de un producto con sus variantes e imágenes",
+        "tags": [
+          "Productos"
+        ]
+      },
+      "put": {
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Actualizar producto existente",
+        "tags": [
+          "Productos"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Baja lógica de producto (Soft Delete)",
+        "tags": [
+          "Productos"
+        ]
+      }
+    },
+    "/inventory/movements": {
+      "get": {
+        "operationId": "InventoryController_getMovements",
+        "parameters": [
+          {
+            "name": "variantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "IN_PURCHASE",
+                "OUT_SALE",
+                "ADJUSTMENT_POSITIVE",
+                "ADJUSTMENT_NEGATIVE",
+                "RETURN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Consultar Kardex de movimientos de inventario con filtros y trazabilidad",
+        "tags": [
+          "Inventario"
+        ]
+      },
+      "post": {
+        "operationId": "InventoryController_createMovement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMovementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Registrar movimiento manual de inventario (compra, ajuste, devolución)",
+        "tags": [
+          "Inventario"
+        ]
+      }
+    },
+    "/inventory/valuation": {
+      "get": {
+        "operationId": "InventoryController_getValuation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener valorización total de existencias en bodega según Costo Promedio Ponderado",
+        "tags": [
+          "Inventario"
+        ]
+      }
+    },
+    "/inventory/alerts": {
+      "get": {
+        "operationId": "InventoryController_getAlerts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener alertas de productos con existencias por debajo del stock mínimo",
+        "tags": [
+          "Inventario"
+        ]
+      }
     }
   },
   "info": {
@@ -469,6 +1012,305 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "UploadFileDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Calzado Deportivo"
+          },
+          "slug": {
+            "type": "string",
+            "example": "calzado-deportivo"
+          },
+          "description": {
+            "type": "string",
+            "example": "Zapatillas y calzado para entrenamiento y running"
+          },
+          "parentId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/shalom-assets/products/shoes.png"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Calzado Deportivo"
+          },
+          "slug": {
+            "type": "string",
+            "example": "calzado-deportivo"
+          },
+          "description": {
+            "type": "string",
+            "example": "Zapatillas y calzado para entrenamiento y running"
+          },
+          "parentId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/shalom-assets/products/shoes.png"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateBrandDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Nike"
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/shalom-assets/brands/nike.png"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateVariantDto": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "ZAP-NIK-NEG-40"
+          },
+          "barcode": {
+            "type": "string",
+            "example": "7701234567890"
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "color": "Negro",
+              "talla": "40"
+            }
+          },
+          "purchasePrice": {
+            "type": "number",
+            "example": 120000
+          },
+          "salePrice": {
+            "type": "number",
+            "example": 210000
+          },
+          "initialStock": {
+            "type": "number",
+            "example": 10,
+            "default": 0
+          }
+        },
+        "required": [
+          "sku",
+          "attributes",
+          "purchasePrice",
+          "salePrice",
+          "initialStock"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Zapatilla Nike Air Max"
+          },
+          "sku": {
+            "type": "string",
+            "example": "ZAP-NIK-AIRMAX-01"
+          },
+          "description": {
+            "type": "string",
+            "example": "Zapatilla deportiva con cápsula de aire para amortiguación superior."
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "brandId": {
+            "type": "string",
+            "example": "b1c2d3e4-f5a6-7890-bcde-fa1234567890"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "example": 120000
+          },
+          "salePrice": {
+            "type": "number",
+            "example": 210000
+          },
+          "minStock": {
+            "type": "number",
+            "example": 5,
+            "default": 5
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "ARCHIVED"
+            ],
+            "default": "ACTIVE"
+          },
+          "images": {
+            "example": [
+              "http://localhost:9000/shalom-assets/products/nike-air-1.jpg"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateVariantDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "sku",
+          "description",
+          "purchasePrice",
+          "salePrice",
+          "minStock",
+          "status"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Zapatilla Nike Air Max Edición 2026"
+          },
+          "sku": {
+            "type": "string",
+            "example": "ZAP-NIK-AIRMAX-01"
+          },
+          "description": {
+            "type": "string",
+            "example": "Descripción actualizada"
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "brandId": {
+            "type": "string",
+            "example": "b1c2d3e4-f5a6-7890-bcde-fa1234567890"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "example": 130000
+          },
+          "salePrice": {
+            "type": "number",
+            "example": 220000
+          },
+          "minStock": {
+            "type": "number",
+            "example": 10
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "ARCHIVED"
+            ]
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "sku",
+          "description",
+          "categoryId",
+          "brandId",
+          "purchasePrice",
+          "salePrice",
+          "minStock",
+          "status"
+        ]
+      },
+      "CreateMovementDto": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IN_PURCHASE",
+              "OUT_SALE",
+              "ADJUSTMENT_POSITIVE",
+              "ADJUSTMENT_NEGATIVE",
+              "RETURN"
+            ],
+            "example": "IN_PURCHASE"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 20
+          },
+          "unitCost": {
+            "type": "number",
+            "example": 120000,
+            "description": "Costo unitario de factura para compras"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Compra según Factura #8942"
+          },
+          "referenceId": {
+            "type": "string",
+            "example": "c1d2e3f4-a5b6-7890-bcde-fa1234567890"
+          }
+        },
+        "required": [
+          "variantId",
+          "type",
+          "quantity"
         ]
       }
     }

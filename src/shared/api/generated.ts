@@ -147,6 +147,184 @@ export interface paths {
         patch: operations["UsersController_updateStatus"];
         trace?: never;
     };
+    "/storage/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subir archivo (imágenes de catálogo o documentos privados) a MinIO / S3 */
+        post: operations["StorageController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar todas las categorías del catálogo */
+        get: operations["CategoriesController_findAll"];
+        put?: never;
+        /** Crear nueva categoría */
+        post: operations["CategoriesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener detalle de una categoría por su ID */
+        get: operations["CategoriesController_findOne"];
+        /** Actualizar categoría existente */
+        put: operations["CategoriesController_update"];
+        post?: never;
+        /** Eliminar categoría (solo si no tiene productos asociados) */
+        delete: operations["CategoriesController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/brands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar todas las marcas comerciales */
+        get: operations["BrandsController_findAll"];
+        put?: never;
+        /** Registrar nueva marca */
+        post: operations["BrandsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/brands/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar marca */
+        delete: operations["BrandsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar productos con filtros, cálculo de margen y existencias consolidadas */
+        get: operations["ProductsController_findAll"];
+        put?: never;
+        /** Crear nuevo producto con variantes y registro inicial en Kardex */
+        post: operations["ProductsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener detalle completo de un producto con sus variantes e imágenes */
+        get: operations["ProductsController_findOne"];
+        /** Actualizar producto existente */
+        put: operations["ProductsController_update"];
+        post?: never;
+        /** Baja lógica de producto (Soft Delete) */
+        delete: operations["ProductsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultar Kardex de movimientos de inventario con filtros y trazabilidad */
+        get: operations["InventoryController_getMovements"];
+        put?: never;
+        /** Registrar movimiento manual de inventario (compra, ajuste, devolución) */
+        post: operations["InventoryController_createMovement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory/valuation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener valorización total de existencias en bodega según Costo Promedio Ponderado */
+        get: operations["InventoryController_getValuation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener alertas de productos con existencias por debajo del stock mínimo */
+        get: operations["InventoryController_getAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -228,6 +406,133 @@ export interface components {
              * @enum {string}
              */
             status: "ACTIVE" | "INACTIVE" | "BLOCKED";
+        };
+        UploadFileDto: Record<string, never>;
+        CreateCategoryDto: {
+            /** @example Calzado Deportivo */
+            name: string;
+            /** @example calzado-deportivo */
+            slug?: string;
+            /** @example Zapatillas y calzado para entrenamiento y running */
+            description?: string;
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            parentId?: string;
+            /** @example http://localhost:9000/shalom-assets/products/shoes.png */
+            imageUrl?: string;
+            /** @example true */
+            isActive?: boolean;
+        };
+        UpdateCategoryDto: {
+            /** @example Calzado Deportivo */
+            name: string;
+            /** @example calzado-deportivo */
+            slug?: string;
+            /** @example Zapatillas y calzado para entrenamiento y running */
+            description?: string;
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            parentId?: string;
+            /** @example http://localhost:9000/shalom-assets/products/shoes.png */
+            imageUrl?: string;
+            /** @example true */
+            isActive?: boolean;
+        };
+        CreateBrandDto: {
+            /** @example Nike */
+            name: string;
+            /** @example http://localhost:9000/shalom-assets/brands/nike.png */
+            logoUrl?: string;
+        };
+        CreateVariantDto: {
+            /** @example ZAP-NIK-NEG-40 */
+            sku: string;
+            /** @example 7701234567890 */
+            barcode?: string;
+            /** @example {
+             *       "color": "Negro",
+             *       "talla": "40"
+             *     } */
+            attributes: Record<string, never>;
+            /** @example 120000 */
+            purchasePrice: number;
+            /** @example 210000 */
+            salePrice: number;
+            /**
+             * @default 0
+             * @example 10
+             */
+            initialStock: number;
+        };
+        CreateProductDto: {
+            /** @example Zapatilla Nike Air Max */
+            name: string;
+            /** @example ZAP-NIK-AIRMAX-01 */
+            sku: string;
+            /** @example Zapatilla deportiva con cápsula de aire para amortiguación superior. */
+            description: string;
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            categoryId?: string;
+            /** @example b1c2d3e4-f5a6-7890-bcde-fa1234567890 */
+            brandId?: string;
+            /** @example 120000 */
+            purchasePrice: number;
+            /** @example 210000 */
+            salePrice: number;
+            /**
+             * @default 5
+             * @example 5
+             */
+            minStock: number;
+            /**
+             * @default ACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE" | "ARCHIVED";
+            /** @example [
+             *       "http://localhost:9000/shalom-assets/products/nike-air-1.jpg"
+             *     ] */
+            images?: string[];
+            variants?: components["schemas"]["CreateVariantDto"][];
+        };
+        UpdateProductDto: {
+            /** @example Zapatilla Nike Air Max Edición 2026 */
+            name: string;
+            /** @example ZAP-NIK-AIRMAX-01 */
+            sku: string;
+            /** @example Descripción actualizada */
+            description: string;
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            categoryId: string;
+            /** @example b1c2d3e4-f5a6-7890-bcde-fa1234567890 */
+            brandId: string;
+            /** @example 130000 */
+            purchasePrice: number;
+            /** @example 220000 */
+            salePrice: number;
+            /** @example 10 */
+            minStock: number;
+            /** @enum {string} */
+            status: "ACTIVE" | "INACTIVE" | "ARCHIVED";
+            images?: string[];
+        };
+        CreateMovementDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            variantId: string;
+            /**
+             * @example IN_PURCHASE
+             * @enum {string}
+             */
+            type: "IN_PURCHASE" | "OUT_SALE" | "ADJUSTMENT_POSITIVE" | "ADJUSTMENT_NEGATIVE" | "RETURN";
+            /** @example 20 */
+            quantity: number;
+            /**
+             * @description Costo unitario de factura para compras
+             * @example 120000
+             */
+            unitCost?: number;
+            /** @example Compra según Factura #8942 */
+            reason?: string;
+            /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
+            referenceId?: string;
         };
     };
     responses: never;
@@ -459,6 +764,369 @@ export interface operations {
         };
         responses: {
             /** @description Estado actualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StorageController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadFileDto"];
+            };
+        };
+        responses: {
+            /** @description Archivo almacenado exitosamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de categorías */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CategoriesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de marcas */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBrandDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Búsqueda por nombre o SKU */
+                search?: string;
+                categoryId?: string;
+                status?: "ACTIVE" | "INACTIVE" | "ARCHIVED";
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InventoryController_getMovements: {
+        parameters: {
+            query?: {
+                variantId?: string;
+                type?: "IN_PURCHASE" | "OUT_SALE" | "ADJUSTMENT_POSITIVE" | "ADJUSTMENT_NEGATIVE" | "RETURN";
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InventoryController_createMovement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMovementDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InventoryController_getValuation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InventoryController_getAlerts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
