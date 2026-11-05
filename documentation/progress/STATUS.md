@@ -2,37 +2,33 @@
 
 ## Información General
 
-- **Fase Actual:** FASE 5 — Dashboard y Finanzas (COMPLETADA)
+- **Fase Actual:** FASE 6 — Integración Evolution API (COMPLETADA)
 - **Última Actualización:** 2026-11-04
 - **Branch Activo:** `main`
 
 ---
 
-## Tareas Realizadas (Fase 5)
+## Tareas Realizadas (Fase 6)
 
-- [x] Sincronización del contrato OpenAPI con `pnpm contract:sync` (nuevos endpoints y esquemas de `expenses`, `finance`, `dashboard` y `reports`).
-- [x] Dashboard interactivo (`/`):
-  - KPIs con deltas porcentuales y comparativa respecto al período anterior (Hoy, Semana, Mes).
-  - Alerta de seguridad para variantes con stock crítico.
-  - Gráficos interactivos con Recharts: Área temporal de ventas vs egresos y dona de distribución de estados de pedidos.
-  - Tabla de ranking de productos más vendidos por facturación.
-- [x] Vista de Finanzas y Control de Gastos (`/finances`):
-  - Tablero de control de P&L con cálculo de Ganancia Bruta, OPEX, Ganancia Neta, Margen Neto %, ROI y Valorización de Inventario.
-  - Formulario modal para registrar egresos operativos en COP con categorización y método de pago.
-  - Tabla de egresos con eliminación y pestaña para el Libro Mayor de Transacciones Financieras.
-- [x] Centro de Reportes y Exportación (`/reports`):
-  - Tarjetas de exportación para Ventas, Inventario, Clientes CRM y Gastos Operativos.
-  - Selector de rangos de fecha y formatos (CSV y JSON).
-  - Descarga directa en navegador con formateo UTF-8 y compatibilidad RFC 4180.
-- [x] Pruebas unitarias en Vitest pasando al 100% y build de Next.js generando 11 rutas estáticas sin errores.
+- [x] Sincronización del contrato OpenAPI con `pnpm contract:sync` (nuevos esquemas y endpoints de `WhatsApp` e instancias de mensajería).
+- [x] Bandeja de Entrada en Tiempo Real de WhatsApp (`/whatsapp`):
+  - Diseño en 3 columnas ergonómico (Lista de conversaciones, Chat en vivo y Contexto CRM con Pedido Rápido).
+  - Filtros y búsqueda instantánea por cliente o número telefónico.
+  - Hilo de mensajes interactivo con estados de lectura (`SENT`, `DELIVERED`, `READ`).
+  - Barra de respuestas rápidas predefinidas (disponibilidad, datos de pago Bancolombia/Nequi, guía de despacho).
+- [x] Pedido Rápido desde WhatsApp:
+  - Formulario integrado en chat para generar pedidos comerciales con cálculo de subtotal, fletes y total COP.
+  - Confirmación inmediata en el hilo de mensajes del cliente.
+- [x] Modal de Vinculación de WhatsApp con Código QR para Evolution API.
+- [x] Pruebas unitarias en Vitest y compilación Next.js generando 12 rutas estáticas limpias.
 
 ---
 
-## Tareas Pendientes (Próxima: Fase 6)
+## Tareas Pendientes (Próxima: Fase 7)
 
-- [ ] Bandeja de entrada en tiempo real de WhatsApp (`/whatsapp`) en 3 columnas.
-- [ ] Conexión y escaneo de código QR para Evolution API.
-- [ ] Creación rápida de pedidos directamente desde el chat.
+- [ ] Constructor visual de flujos con React Flow (`/automations`).
+- [ ] Nodos personalizados (Trigger, Mensaje, Condición, Crear Pedido, Esperar).
+- [ ] Publicación y versionado de automatizaciones.
 
 ---
 

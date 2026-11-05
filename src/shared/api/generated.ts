@@ -670,6 +670,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/whatsapp/instances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar instancias de mensajería y su estado de conexión */
+        get: operations["WhatsAppController_listInstances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/whatsapp/instances/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Solicitar conexión y generación de código QR para WhatsApp */
+        post: operations["WhatsAppController_connect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/whatsapp/instances/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Desconectar sesión activa de WhatsApp */
+        delete: operations["WhatsAppController_disconnect"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/whatsapp/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar conversaciones activas de WhatsApp con datos del CRM */
+        get: operations["WhatsAppController_listConversations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/whatsapp/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener historial de mensajes de una conversación */
+        get: operations["WhatsAppController_getMessages"];
+        put?: never;
+        /** Enviar mensaje de texto o multimedia por WhatsApp */
+        post: operations["WhatsAppController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/whatsapp/conversations/{id}/quick-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generar pedido comercial rápido directamente desde el chat de WhatsApp con confirmación automática */
+        post: operations["WhatsAppController_createQuickOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/evolution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Endpoint receptor de eventos y mensajes entrantes de Evolution API (Idempotente) */
+        post: operations["WebhooksController_handleEvolutionWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1022,6 +1142,40 @@ export interface components {
             startDate?: string;
             /** @example 2026-11-30 */
             endDate?: string;
+        };
+        SendWhatsAppMessageDto: {
+            /**
+             * @description Texto del mensaje
+             * @example ¡Hola! Tu pedido ha sido confirmado con éxito.
+             */
+            text: string;
+            /** @example https://minio.shalom.local/comprobantes/factura-123.pdf */
+            mediaUrl?: string;
+            /** @example Comprobante de compra */
+            caption?: string;
+        };
+        QuickOrderItemDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            variantId: string;
+            /** @example 1 */
+            quantity: number;
+        };
+        QuickOrderFromChatDto: {
+            items: components["schemas"]["QuickOrderItemDto"][];
+            /** @example 0 */
+            discount?: number;
+            /** @example 0 */
+            shippingCost?: number;
+            /** @example Pedido acordado por WhatsApp con entrega en Medellín */
+            notes?: string;
+        };
+        EvolutionWebhookDto: {
+            /** @example messages.upsert */
+            event: string;
+            /** @example shalom-main */
+            instance: string;
+            /** @description Payload completo del webhook emitido por Evolution API */
+            data: Record<string, never>;
         };
     };
     responses: never;
@@ -2149,6 +2303,169 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_listInstances: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_connect: {
+        parameters: {
+            query?: {
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_disconnect: {
+        parameters: {
+            query?: {
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_listConversations: {
+        parameters: {
+            query?: {
+                search?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_getMessages: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendWhatsAppMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WhatsAppController_createQuickOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuickOrderFromChatDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WebhooksController_handleEvolutionWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvolutionWebhookDto"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
