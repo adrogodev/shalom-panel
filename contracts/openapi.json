@@ -1,0 +1,12 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SHALOM Server API",
+    "description": "API REST para plataforma de gestión comercial SHALOM",
+    "version": "1.0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {}
+  }
+}
