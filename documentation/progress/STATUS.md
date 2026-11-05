@@ -2,32 +2,37 @@
 
 ## Información General
 
-- **Fase Actual:** FASE 4 — Clientes y Pedidos (COMPLETADA)
+- **Fase Actual:** FASE 5 — Dashboard y Finanzas (COMPLETADA)
 - **Última Actualización:** 2026-11-04
 - **Branch Activo:** `main`
 
 ---
 
-## Tareas Realizadas (Fase 4)
+## Tareas Realizadas (Fase 5)
 
-- [x] Sincronización del contrato OpenAPI con tipos de Clientes CRM, Pedidos, Transiciones y Pagos (`src/shared/api/generated.ts`).
-- [x] Vista completa de Clientes CRM en `/customers`:
-  - Listado con teléfonos E.164, direcciones predeterminadas, total gastado y etiquetas.
-  - Búsqueda en vivo y filtrado por tags.
-- [x] Vista completa de Gestión de Pedidos en `/orders`:
-  - Pestañas por estado comercial (Nuevos, Confirmados, En preparación, Enviados, Entregados).
-  - Listado con numeración `SH-YYYY-XXXX`, clientes, totales, estado del pedido (badges de color) y estado de cobro.
-  - Acciones rápidas de avance de estado según transiciones permitidas.
-- [x] Pruebas unitarias de Vitest pasando al 100%.
-- [x] Compilación Next.js verificada exitosamente (9 páginas estáticas generadas).
+- [x] Sincronización del contrato OpenAPI con `pnpm contract:sync` (nuevos endpoints y esquemas de `expenses`, `finance`, `dashboard` y `reports`).
+- [x] Dashboard interactivo (`/`):
+  - KPIs con deltas porcentuales y comparativa respecto al período anterior (Hoy, Semana, Mes).
+  - Alerta de seguridad para variantes con stock crítico.
+  - Gráficos interactivos con Recharts: Área temporal de ventas vs egresos y dona de distribución de estados de pedidos.
+  - Tabla de ranking de productos más vendidos por facturación.
+- [x] Vista de Finanzas y Control de Gastos (`/finances`):
+  - Tablero de control de P&L con cálculo de Ganancia Bruta, OPEX, Ganancia Neta, Margen Neto %, ROI y Valorización de Inventario.
+  - Formulario modal para registrar egresos operativos en COP con categorización y método de pago.
+  - Tabla de egresos con eliminación y pestaña para el Libro Mayor de Transacciones Financieras.
+- [x] Centro de Reportes y Exportación (`/reports`):
+  - Tarjetas de exportación para Ventas, Inventario, Clientes CRM y Gastos Operativos.
+  - Selector de rangos de fecha y formatos (CSV y JSON).
+  - Descarga directa en navegador con formateo UTF-8 y compatibilidad RFC 4180.
+- [x] Pruebas unitarias en Vitest pasando al 100% y build de Next.js generando 11 rutas estáticas sin errores.
 
 ---
 
-## Tareas Pendientes (Próxima: Fase 5)
+## Tareas Pendientes (Próxima: Fase 6)
 
-- [ ] Dashboard analítico con gráficas Recharts (ventas, ingresos vs. gastos, pedidos por estado).
-- [ ] Vistas de Finanzas y Egresos (`/finances`): registro de gastos operativos y métricas de rentabilidad.
-- [ ] Vista de Reportes (`/reports`) con descarga de archivos generados.
+- [ ] Bandeja de entrada en tiempo real de WhatsApp (`/whatsapp`) en 3 columnas.
+- [ ] Conexión y escaneo de código QR para Evolution API.
+- [ ] Creación rápida de pedidos directamente desde el chat.
 
 ---
 

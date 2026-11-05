@@ -498,6 +498,178 @@ export interface paths {
         patch: operations["PaymentsController_confirmPayment"];
         trace?: never;
     };
+    "/api/v1/expenses/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar todas las categorías de gastos */
+        get: operations["ExpensesController_listCategories"];
+        put?: never;
+        /** Crear una nueva categoría de gastos */
+        post: operations["ExpensesController_createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/expenses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar gastos operativos con paginación y filtros */
+        get: operations["ExpensesController_list"];
+        put?: never;
+        /** Registrar un nuevo gasto operativo */
+        post: operations["ExpensesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/expenses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar un gasto operativo */
+        delete: operations["ExpensesController_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener resumen financiero detallado (Ventas, COGS, Ganancia Bruta, OPEX, Ganancia Neta, ROI) */
+        get: operations["FinanceController_getSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/finance/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar transacciones del libro mayor financiero con filtros y paginación */
+        get: operations["FinanceController_getTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas analíticas ejecutivas con comparativas porcentuales vs período anterior */
+        get: operations["DashboardController_getMetrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/chart-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Serie de tiempo diaria de ventas y egresos para gráficos Recharts */
+        get: operations["DashboardController_getChartSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/status-distribution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Distribución de pedidos por estado con porcentajes */
+        get: operations["DashboardController_getStatusDistribution"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/top-products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Top productos más vendidos por volumen y facturación */
+        get: operations["DashboardController_getTopProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generar y exportar reportes analíticos y operativos (Ventas, Inventario, Clientes, Gastos) en CSV o JSON */
+        post: operations["ReportsController_export"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -809,6 +981,47 @@ export interface components {
             referenceNumber?: string;
             /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
             voucherFileId?: string;
+        };
+        CreateExpenseCategoryDto: {
+            /** @example Publicidad Digital */
+            name: string;
+            /** @example Campañas de Meta Ads, Google Ads y TikTok Ads */
+            description?: string;
+        };
+        CreateExpenseDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            categoryId: string;
+            /**
+             * @description Monto del egreso en COP
+             * @example 350000
+             */
+            amount: number;
+            /** @example Campaña publicitaria de WhatsApp en Meta Ads */
+            description: string;
+            /** @example 2026-11-04 */
+            date: string;
+            /** @example Meta Platforms Inc. */
+            supplier?: string;
+            /** @example b1c2d3e4-f5a6-7890-bcde-fa1234567890 */
+            methodId?: string;
+            /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
+            voucherFileId?: string;
+        };
+        GenerateReportDto: {
+            /**
+             * @example SALES
+             * @enum {string}
+             */
+            type: "SALES" | "INVENTORY" | "CUSTOMERS" | "EXPENSES";
+            /**
+             * @default csv
+             * @enum {string}
+             */
+            format: "csv" | "json";
+            /** @example 2026-11-01 */
+            startDate?: string;
+            /** @example 2026-11-30 */
+            endDate?: string;
         };
     };
     responses: never;
@@ -1695,6 +1908,247 @@ export interface operations {
         responses: {
             /** @description Pago confirmado exitosamente */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExpensesController_listCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExpensesController_createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateExpenseCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExpensesController_list: {
+        parameters: {
+            query?: {
+                categoryId?: string;
+                startDate?: string;
+                endDate?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExpensesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateExpenseDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExpensesController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FinanceController_getSummary: {
+        parameters: {
+            query?: {
+                /** @description Fecha inicial (YYYY-MM-DD) */
+                startDate?: string;
+                /** @description Fecha final (YYYY-MM-DD) */
+                endDate?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FinanceController_getTransactions: {
+        parameters: {
+            query?: {
+                type?: "INCOME_SALE" | "EXPENSE_OPERATIONAL" | "EXPENSE_PURCHASE" | "REFUND";
+                startDate?: string;
+                endDate?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_getMetrics: {
+        parameters: {
+            query?: {
+                period?: "today" | "week" | "month" | "year";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_getChartSeries: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_getStatusDistribution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_getTopProducts: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateReportDto"];
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

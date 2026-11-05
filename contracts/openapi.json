@@ -1288,6 +1288,426 @@
           "Pagos"
         ]
       }
+    },
+    "/api/v1/expenses/categories": {
+      "get": {
+        "operationId": "ExpensesController_listCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar todas las categorías de gastos",
+        "tags": [
+          "Expenses"
+        ]
+      },
+      "post": {
+        "operationId": "ExpensesController_createCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una nueva categoría de gastos",
+        "tags": [
+          "Expenses"
+        ]
+      }
+    },
+    "/api/v1/expenses": {
+      "get": {
+        "operationId": "ExpensesController_list",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar gastos operativos con paginación y filtros",
+        "tags": [
+          "Expenses"
+        ]
+      },
+      "post": {
+        "operationId": "ExpensesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar un nuevo gasto operativo",
+        "tags": [
+          "Expenses"
+        ]
+      }
+    },
+    "/api/v1/expenses/{id}": {
+      "delete": {
+        "operationId": "ExpensesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar un gasto operativo",
+        "tags": [
+          "Expenses"
+        ]
+      }
+    },
+    "/api/v1/finance/summary": {
+      "get": {
+        "operationId": "FinanceController_getSummary",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Fecha inicial (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-11-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Fecha final (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-11-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener resumen financiero detallado (Ventas, COGS, Ganancia Bruta, OPEX, Ganancia Neta, ROI)",
+        "tags": [
+          "Finance"
+        ]
+      }
+    },
+    "/api/v1/finance/transactions": {
+      "get": {
+        "operationId": "FinanceController_getTransactions",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "INCOME_SALE",
+                "EXPENSE_OPERATIONAL",
+                "EXPENSE_PURCHASE",
+                "REFUND"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar transacciones del libro mayor financiero con filtros y paginación",
+        "tags": [
+          "Finance"
+        ]
+      }
+    },
+    "/api/v1/dashboard/metrics": {
+      "get": {
+        "operationId": "DashboardController_getMetrics",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "month",
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Métricas analíticas ejecutivas con comparativas porcentuales vs período anterior",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/chart-series": {
+      "get": {
+        "operationId": "DashboardController_getChartSeries",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Serie de tiempo diaria de ventas y egresos para gráficos Recharts",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/status-distribution": {
+      "get": {
+        "operationId": "DashboardController_getStatusDistribution",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Distribución de pedidos por estado con porcentajes",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/top-products": {
+      "get": {
+        "operationId": "DashboardController_getTopProducts",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Top productos más vendidos por volumen y facturación",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/api/v1/reports/export": {
+      "post": {
+        "operationId": "ReportsController_export",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generar y exportar reportes analíticos y operativos (Ventas, Inventario, Clientes, Gastos) en CSV o JSON",
+        "tags": [
+          "Reports"
+        ]
+      }
     }
   },
   "info": {
@@ -2000,6 +2420,96 @@
           "orderId",
           "methodId",
           "amount"
+        ]
+      },
+      "CreateExpenseCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Publicidad Digital"
+          },
+          "description": {
+            "type": "string",
+            "example": "Campañas de Meta Ads, Google Ads y TikTok Ads"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateExpenseDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "amount": {
+            "type": "number",
+            "example": 350000,
+            "description": "Monto del egreso en COP"
+          },
+          "description": {
+            "type": "string",
+            "example": "Campaña publicitaria de WhatsApp en Meta Ads"
+          },
+          "date": {
+            "type": "string",
+            "example": "2026-11-04"
+          },
+          "supplier": {
+            "type": "string",
+            "example": "Meta Platforms Inc."
+          },
+          "methodId": {
+            "type": "string",
+            "example": "b1c2d3e4-f5a6-7890-bcde-fa1234567890"
+          },
+          "voucherFileId": {
+            "type": "string",
+            "example": "c1d2e3f4-a5b6-7890-bcde-fa1234567890"
+          }
+        },
+        "required": [
+          "categoryId",
+          "amount",
+          "description",
+          "date"
+        ]
+      },
+      "GenerateReportDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SALES",
+              "INVENTORY",
+              "CUSTOMERS",
+              "EXPENSES"
+            ],
+            "example": "SALES"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "json"
+            ],
+            "default": "csv"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2026-11-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2026-11-30"
+          }
+        },
+        "required": [
+          "type"
         ]
       }
     }

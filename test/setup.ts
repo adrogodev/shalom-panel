@@ -10,3 +10,10 @@ vi.mock('next/navigation', () => ({
     back: vi.fn(),
   }),
 }));
+
+// Mock ResizeObserver para Recharts en entorno de pruebas jsdom
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
