@@ -2,34 +2,31 @@
 
 ## Información General
 
-- **Fase Actual:** FASE 1 — Infraestructura y Configuración (COMPLETADA)
+- **Fase Actual:** FASE 2 — Identidad Visual y Estructura Administrativa (COMPLETADA)
 - **Última Actualización:** 2026-11-04
 - **Branch Activo:** `main`
 
 ---
 
-## Tareas Realizadas (Fase 1)
+## Tareas Realizadas (Fase 2)
 
-- [x] Inicialización del proyecto Next.js 15 (App Router) con TypeScript estricto.
-- [x] Configuración de Tailwind CSS v4 con `@theme` y tokens de marca (`globals.css`).
-- [x] Estructura FSD completa: `app/` (rutas delgadas), `pages/README.md` (desactivador de pages router), `src/app`, `src/pages`, `src/widgets`, `src/features`, `src/entities`, `src/shared`.
-- [x] Sincronización de contrato OpenAPI (`pnpm contract:sync`) -> `src/shared/api/generated.ts`.
-- [x] Configuración de TanStack Query en `src/app/providers.tsx`.
-- [x] Cliente API fetch agnóstico en `src/shared/api/index.ts`.
-- [x] Vista base de Dashboard en `src/pages/home/ui/HomePage.tsx`.
-- [x] Suite de pruebas unitarias con Vitest y `@testing-library/react` (`test/home.spec.tsx` pasando).
-- [x] Compilación para producción (`next build`) verificada exitosamente.
-- [x] Dockerfile multi-stage, `docker-compose.yml`, `docker-compose.prod.yml`, `.dockerignore`.
-- [x] Pipeline de CI en `.github/workflows/ci.yml`.
+- [x] Layout administrativo completo (`AdminLayout`): Sidebar con navegación completa (10 módulos) y Header.
+- [x] Header interactivo con búsqueda global, indicador de estado de WhatsApp en tiempo real, notificaciones y menú de perfil.
+- [x] Módulo de autenticación con Zustand (`useAuthStore`) y persistencia local de sesión.
+- [x] Formulario de inicio de sesión (`LoginForm`) con validación Zod y React Hook Form.
+- [x] Vista completa de Login en `/login` integrada con la API.
+- [x] Sincronización de contratos (`contracts/openapi.json` y `src/shared/api/generated.ts`).
+- [x] Pruebas unitarias de Vitest pasando al 100%.
+- [x] Compilación Next.js de producción pasando con 5 rutas estáticas.
 
 ---
 
-## Tareas Pendientes (Próxima: Fase 2)
+## Tareas Pendientes (Próxima: Fase 3)
 
-- [ ] Sistema de layout administrativo: Sidebar, Header con estado de WhatsApp, Breadcrumbs.
-- [ ] Vistas de autenticación: Login, recuperación, gestión de sesión.
-- [ ] Protección de rutas mediante middleware o client guard.
-- [ ] Integración de permisos y RBAC en elementos de UI.
+- [ ] Pantalla de gestión de productos: listado, filtros, búsqueda, paginación.
+- [ ] Formulario de creación y edición de productos con variantes y atributos.
+- [ ] Subida de imágenes a MinIO (`shalom-assets`).
+- [ ] Pantalla de inventario: kardex de movimientos, alertas de stock mínimo y ajustes.
 
 ---
 

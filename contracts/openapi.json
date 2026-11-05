@@ -36,6 +36,252 @@
           "Health"
         ]
       }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Autentica las credenciales del usuario, emite un Access Token JWT de 15 minutos y un Refresh Token rotativo de 7 días.",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas o cuenta inactiva"
+          }
+        },
+        "summary": "Iniciar sesión con correo electrónico y contraseña",
+        "tags": [
+          "Autenticación"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Valida el Refresh Token actual, lo revoca de forma inmediata y emite un nuevo par de tokens.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens renovados exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido, expirado o reutilizado"
+          }
+        },
+        "summary": "Renovar Access Token con rotación de Refresh Token",
+        "tags": [
+          "Autenticación"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión finalizada exitosamente"
+          }
+        },
+        "summary": "Cerrar sesión y revocar Refresh Token",
+        "tags": [
+          "Autenticación"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil y roles del usuario activo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token no proporcionado o expirado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener información y permisos del usuario autenticado actual",
+        "tags": [
+          "Autenticación"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar usuarios registrados del sistema con sus roles",
+        "tags": [
+          "Usuarios"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado exitosamente"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear nuevo usuario con asignación de roles",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle del usuario"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener detalle de un usuario por su identificador UUID",
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/users/{id}/status": {
+      "patch": {
+        "operationId": "UsersController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado actualizado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Modificar el estado (ACTIVE, INACTIVE, BLOCKED) de un usuario",
+        "tags": [
+          "Usuarios"
+        ]
+      }
     }
   },
   "info": {
@@ -57,6 +303,174 @@
         "in": "header"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "admin@shalom.local",
+            "description": "Correo electrónico del usuario registrado"
+          },
+          "password": {
+            "type": "string",
+            "example": "ShalomAdmin2026!",
+            "description": "Contraseña en texto plano"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "email": {
+            "type": "string",
+            "example": "admin@shalom.local"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Administrador"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "SHALOM"
+          },
+          "roles": {
+            "example": [
+              "Administrador"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "example": [
+              "products:read",
+              "orders:create"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName",
+          "roles",
+          "permissions"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT Access Token de corta duración (15 minutos)"
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "d9b7f5c2e1a4...",
+            "description": "Refresh Token rotativo seguro de 7 días"
+          },
+          "user": {
+            "description": "Perfil del usuario autenticado con roles y permisos asignados",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserProfileDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "user"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "d9b7f5c2...",
+            "description": "Refresh Token emitido durante el login"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "operador@shalom.local"
+          },
+          "password": {
+            "type": "string",
+            "example": "Temporal2026!"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Carlos"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Gómez"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+573009876543"
+          },
+          "roles": {
+            "example": [
+              "Operador/Ventas"
+            ],
+            "description": "Nombres de los roles a asignar",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "firstName",
+          "lastName",
+          "roles"
+        ]
+      },
+      "UpdateUserStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "BLOCKED"
+            ],
+            "example": "INACTIVE"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    }
   }
 }

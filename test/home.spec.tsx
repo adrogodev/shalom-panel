@@ -11,8 +11,8 @@ describe('HomePage', () => {
   it('debe mostrar las 4 métricas base de la plataforma', () => {
     render(<HomePage />);
     expect(screen.getByText('Ventas Reconocidas')).toBeInTheDocument();
-    expect(screen.getByText('Pedidos Activos')).toBeInTheDocument();
-    expect(screen.getByText('Clientes CRM')).toBeInTheDocument();
-    expect(screen.getByText('WhatsApp Chats')).toBeInTheDocument();
+    expect(screen.getAllByText('Pedidos Activos').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Clientes CRM').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('WhatsApp Chats').length).toBeGreaterThanOrEqual(1);
   });
 });

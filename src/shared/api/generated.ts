@@ -21,10 +21,215 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Iniciar sesión con correo electrónico y contraseña
+         * @description Autentica las credenciales del usuario, emite un Access Token JWT de 15 minutos y un Refresh Token rotativo de 7 días.
+         */
+        post: operations["AuthController_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renovar Access Token con rotación de Refresh Token
+         * @description Valida el Refresh Token actual, lo revoca de forma inmediata y emite un nuevo par de tokens.
+         */
+        post: operations["AuthController_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cerrar sesión y revocar Refresh Token */
+        post: operations["AuthController_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener información y permisos del usuario autenticado actual */
+        get: operations["AuthController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar usuarios registrados del sistema con sus roles */
+        get: operations["UsersController_findAll"];
+        put?: never;
+        /** Crear nuevo usuario con asignación de roles */
+        post: operations["UsersController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener detalle de un usuario por su identificador UUID */
+        get: operations["UsersController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Modificar el estado (ACTIVE, INACTIVE, BLOCKED) de un usuario */
+        patch: operations["UsersController_updateStatus"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        LoginDto: {
+            /**
+             * @description Correo electrónico del usuario registrado
+             * @example admin@shalom.local
+             */
+            email: string;
+            /**
+             * @description Contraseña en texto plano
+             * @example ShalomAdmin2026!
+             */
+            password: string;
+        };
+        UserProfileDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example admin@shalom.local */
+            email: string;
+            /** @example Administrador */
+            firstName: string;
+            /** @example SHALOM */
+            lastName: string;
+            /** @example [
+             *       "Administrador"
+             *     ] */
+            roles: string[];
+            /** @example [
+             *       "products:read",
+             *       "orders:create"
+             *     ] */
+            permissions: string[];
+        };
+        AuthResponseDto: {
+            /**
+             * @description JWT Access Token de corta duración (15 minutos)
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /**
+             * @description Refresh Token rotativo seguro de 7 días
+             * @example d9b7f5c2e1a4...
+             */
+            refreshToken: string;
+            /** @description Perfil del usuario autenticado con roles y permisos asignados */
+            user: components["schemas"]["UserProfileDto"];
+        };
+        RefreshTokenDto: {
+            /**
+             * @description Refresh Token emitido durante el login
+             * @example d9b7f5c2...
+             */
+            refreshToken: string;
+        };
+        CreateUserDto: {
+            /** @example operador@shalom.local */
+            email: string;
+            /** @example Temporal2026! */
+            password: string;
+            /** @example Carlos */
+            firstName: string;
+            /** @example Gómez */
+            lastName: string;
+            /** @example +573009876543 */
+            phone?: string;
+            /**
+             * @description Nombres de los roles a asignar
+             * @example [
+             *       "Operador/Ventas"
+             *     ]
+             */
+            roles: string[];
+        };
+        UpdateUserStatusDto: {
+            /**
+             * @example INACTIVE
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE" | "BLOCKED";
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -57,6 +262,208 @@ export interface operations {
                         uptime?: number;
                     };
                 };
+            };
+        };
+    };
+    AuthController_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginDto"];
+            };
+        };
+        responses: {
+            /** @description Autenticación exitosa */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+            /** @description Credenciales inválidas o cuenta inactiva */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Tokens renovados exitosamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+            /** @description Token inválido, expirado o reutilizado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
+        responses: {
+            /** @description Sesión finalizada exitosamente */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Perfil y roles del usuario activo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileDto"];
+                };
+            };
+            /** @description Token no proporcionado o expirado */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de usuarios */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserDto"];
+            };
+        };
+        responses: {
+            /** @description Usuario creado exitosamente */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Detalle del usuario */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Estado actualizado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
