@@ -1963,6 +1963,255 @@
           "Webhooks"
         ]
       }
+    },
+    "/api/v1/automations": {
+      "get": {
+        "operationId": "AutomationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar todas las automatizaciones comerciales y de mensajería",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "post": {
+        "operationId": "AutomationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAutomationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una nueva automatización con plantilla inicial",
+        "tags": [
+          "Automations"
+        ]
+      }
+    },
+    "/api/v1/automations/{id}": {
+      "get": {
+        "operationId": "AutomationsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener detalle de una automatización con su historial de versiones",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "patch": {
+        "operationId": "AutomationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAutomationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar metadatos o estado activo de una automatización",
+        "tags": [
+          "Automations"
+        ]
+      }
+    },
+    "/api/v1/automations/{id}/versions": {
+      "post": {
+        "operationId": "AutomationsController_saveVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFlowDefinitionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Guardar nueva versión de diseño del flujo con validación DFS contra ciclos infinitos",
+        "tags": [
+          "Automations"
+        ]
+      }
+    },
+    "/api/v1/automations/{id}/versions/{versionId}/publish": {
+      "post": {
+        "operationId": "AutomationsController_publishVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publicar versión activa para ejecución en producción",
+        "tags": [
+          "Automations"
+        ]
+      }
+    },
+    "/api/v1/automations/trigger": {
+      "post": {
+        "operationId": "AutomationsController_executeTrigger",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerExecutionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disparar ejecución de flujo por evento",
+        "tags": [
+          "Automations"
+        ]
+      }
+    },
+    "/api/v1/automations/{id}/executions": {
+      "get": {
+        "operationId": "AutomationsController_getExecutions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar historial de ejecuciones y trazabilidad de pasos",
+        "tags": [
+          "Automations"
+        ]
+      }
     }
   },
   "info": {
@@ -2851,6 +3100,74 @@
           "event",
           "instance",
           "data"
+        ]
+      },
+      "CreateAutomationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Confirmación de Pedido WhatsApp"
+          },
+          "description": {
+            "type": "string",
+            "example": "Envía un mensaje con el resumen y cuenta de pago cuando se crea un pedido"
+          },
+          "triggerType": {
+            "type": "string",
+            "example": "ORDER_CREATED",
+            "description": "Tipo de disparador: ORDER_CREATED, ORDER_STATUS_CHANGED, CUSTOMER_CREATED, MESSAGE_RECEIVED"
+          }
+        },
+        "required": [
+          "name",
+          "triggerType"
+        ]
+      },
+      "UpdateAutomationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SaveFlowDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "definition": {
+            "type": "object",
+            "description": "Definición del grafo: { nodes: FlowNode[], edges: FlowEdge[] }"
+          }
+        },
+        "required": [
+          "definition"
+        ]
+      },
+      "TriggerExecutionDto": {
+        "type": "object",
+        "properties": {
+          "triggerType": {
+            "type": "string",
+            "example": "ORDER_CREATED"
+          },
+          "entityId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "contextData": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "triggerType",
+          "entityId"
         ]
       }
     }

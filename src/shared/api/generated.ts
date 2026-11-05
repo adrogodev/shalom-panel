@@ -790,6 +790,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/automations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar todas las automatizaciones comerciales y de mensajería */
+        get: operations["AutomationsController_list"];
+        put?: never;
+        /** Crear una nueva automatización con plantilla inicial */
+        post: operations["AutomationsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/automations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener detalle de una automatización con su historial de versiones */
+        get: operations["AutomationsController_getById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Actualizar metadatos o estado activo de una automatización */
+        patch: operations["AutomationsController_update"];
+        trace?: never;
+    };
+    "/api/v1/automations/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Guardar nueva versión de diseño del flujo con validación DFS contra ciclos infinitos */
+        post: operations["AutomationsController_saveVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/automations/{id}/versions/{versionId}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publicar versión activa para ejecución en producción */
+        post: operations["AutomationsController_publishVersion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/automations/trigger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disparar ejecución de flujo por evento */
+        post: operations["AutomationsController_executeTrigger"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/automations/{id}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar historial de ejecuciones y trazabilidad de pasos */
+        get: operations["AutomationsController_getExecutions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1176,6 +1280,33 @@ export interface components {
             instance: string;
             /** @description Payload completo del webhook emitido por Evolution API */
             data: Record<string, never>;
+        };
+        CreateAutomationDto: {
+            /** @example Confirmación de Pedido WhatsApp */
+            name: string;
+            /** @example Envía un mensaje con el resumen y cuenta de pago cuando se crea un pedido */
+            description?: string;
+            /**
+             * @description Tipo de disparador: ORDER_CREATED, ORDER_STATUS_CHANGED, CUSTOMER_CREATED, MESSAGE_RECEIVED
+             * @example ORDER_CREATED
+             */
+            triggerType: string;
+        };
+        UpdateAutomationDto: {
+            name?: string;
+            description?: string;
+            isActive?: boolean;
+        };
+        SaveFlowDefinitionDto: {
+            /** @description Definición del grafo: { nodes: FlowNode[], edges: FlowEdge[] } */
+            definition: Record<string, never>;
+        };
+        TriggerExecutionDto: {
+            /** @example ORDER_CREATED */
+            triggerType: string;
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            entityId: string;
+            contextData?: Record<string, never>;
         };
     };
     responses: never;
@@ -2464,6 +2595,169 @@ export interface operations {
                 "application/json": components["schemas"]["EvolutionWebhookDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAutomationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_getById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAutomationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_saveVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFlowDefinitionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_publishVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_executeTrigger: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TriggerExecutionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AutomationsController_getExecutions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
