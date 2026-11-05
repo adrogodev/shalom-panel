@@ -1,0 +1,65 @@
+name: Panel CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Build, Lint, Test & Validate Contract
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Panel Repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Contract Types Generation
+        run: |
+          pnpm contract:sync
+          git diff --exit-code src/shared/api/generated.ts || (echo "Error: los tipos generados no coinciden con contracts/openapi.json" && exit 1)
+
+      - name: Run Typecheck and Linter
+        run: |
+          pnpm tsc --noEmit
+          pnpm lint
+
+      - name: Run Unit Tests with Vitest
+        run: pnpm test
+
+      - name: Build Next.js Application
+        run: pnpm build
+
+      - name: Validate Dockerfile Build
+        run: docker build -t shalom-panel:ci .

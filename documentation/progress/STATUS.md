@@ -2,47 +2,37 @@
 
 ## Información General
 
-- **Fase Actual:** FASE 0 — Análisis y Arquitectura
+- **Fase Actual:** FASE 1 — Infraestructura y Configuración (COMPLETADA)
 - **Última Actualización:** 2026-11-04
 - **Branch Activo:** `main`
 
 ---
 
-## Tareas Realizadas (Fase 0)
+## Tareas Realizadas (Fase 1)
 
-- [x] Inicialización del repositorio Git independiente (`panel/.git`).
-- [x] Configuración de `.gitignore` para Next.js, Playwright, Vitest y pnpm.
-- [x] Documentación de Arquitectura Feature-Sliced Design (`documentation/fsd-architecture.md`).
-- [x] Mapa de pantallas, experiencia de usuario y paleta semántica (`documentation/screens-flow.md`).
-- [x] Especificación del contrato OpenAPI y eventos WebSocket (`documentation/contracts-expected.md`).
-- [x] Matriz de compatibilidad de versiones fijadas (`documentation/compatibility-matrix.md`).
-- [x] ADRs de Frontend: ADR-001 a ADR-004.
+- [x] Inicialización del proyecto Next.js 15 (App Router) con TypeScript estricto.
+- [x] Configuración de Tailwind CSS v4 con `@theme` y tokens de marca (`globals.css`).
+- [x] Estructura FSD completa: `app/` (rutas delgadas), `pages/README.md` (desactivador de pages router), `src/app`, `src/pages`, `src/widgets`, `src/features`, `src/entities`, `src/shared`.
+- [x] Sincronización de contrato OpenAPI (`pnpm contract:sync`) -> `src/shared/api/generated.ts`.
+- [x] Configuración de TanStack Query en `src/app/providers.tsx`.
+- [x] Cliente API fetch agnóstico en `src/shared/api/index.ts`.
+- [x] Vista base de Dashboard en `src/pages/home/ui/HomePage.tsx`.
+- [x] Suite de pruebas unitarias con Vitest y `@testing-library/react` (`test/home.spec.tsx` pasando).
+- [x] Compilación para producción (`next build`) verificada exitosamente.
+- [x] Dockerfile multi-stage, `docker-compose.yml`, `docker-compose.prod.yml`, `.dockerignore`.
+- [x] Pipeline de CI en `.github/workflows/ci.yml`.
 
 ---
 
-## Tareas Pendientes (Próxima: Fase 1)
+## Tareas Pendientes (Próxima: Fase 2)
 
-- [ ] Inicialización del proyecto Next.js 15 (App Router) con TypeScript estricto.
-- [ ] Configuración de Tailwind CSS v4 con tokens de marca en CSS.
-- [ ] Instalación e integración de componentes base shadcn/ui.
-- [ ] Configuración del script `pnpm contract:sync` con `openapi-typescript`.
-- [ ] Implementación de estructura de carpetas FSD (`app/`, `pages/`, `src/`).
-- [ ] Configuración de Vitest para pruebas unitarias.
-- [ ] Configuración de Playwright para pruebas E2E.
-- [ ] Dockerfile multi-stage (standalone) y `docker-compose.yml` independiente.
-- [ ] Pipeline de CI en `.github/workflows/ci.yml`.
+- [ ] Sistema de layout administrativo: Sidebar, Header con estado de WhatsApp, Breadcrumbs.
+- [ ] Vistas de autenticación: Login, recuperación, gestión de sesión.
+- [ ] Protección de rutas mediante middleware o client guard.
+- [ ] Integración de permisos y RBAC en elementos de UI.
 
 ---
 
 ## Bloqueos Activos
 
-- Ninguno. Entorno verificado: Node v22.16.0, pnpm v10.11.0, git v2.49.0.
-
----
-
-## Comandos de Validación Ejecutados
-
-```bash
-git status
-# Verificado: Repositorio limpio con documentación inicial de Fase 0
-```
+- Ninguno.

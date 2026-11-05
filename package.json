@@ -1,0 +1,49 @@
+{
+  "name": "shalom-panel",
+  "version": "1.0.0",
+  "description": "Frontend administrativo con Feature-Sliced Design, Tailwind v4 y React Flow para SHALOM",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "contract:sync": "node scripts/sync-contract.js"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "3.10.0",
+    "@tanstack/react-query": "5.66.11",
+    "@xyflow/react": "12.4.4",
+    "clsx": "2.1.1",
+    "lucide-react": "0.475.0",
+    "next": "15.2.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-hook-form": "7.54.2",
+    "recharts": "2.15.1",
+    "tailwind-merge": "3.0.2",
+    "zod": "3.24.2",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.50.1",
+    "@tailwindcss/postcss": "4.0.9",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.2.0",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "@vitejs/plugin-react": "4.3.4",
+    "eslint": "9.21.0",
+    "eslint-config-next": "15.2.1",
+    "jsdom": "26.0.0",
+    "openapi-typescript": "7.6.1",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.0.9",
+    "typescript": "5.7.3",
+    "vitest": "3.0.7"
+  }
+}

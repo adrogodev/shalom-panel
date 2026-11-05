@@ -1,12 +1,62 @@
 {
   "openapi": "3.0.0",
-  "info": {
-    "title": "SHALOM Server API",
-    "description": "API REST para plataforma de gestión comercial SHALOM",
-    "version": "1.0.0"
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Servidor operativo y saludable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "example": "2026-11-04T19:30:00.000Z"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 123.45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verificación de estado y salud del servidor",
+        "tags": [
+          "Health"
+        ]
+      }
+    }
   },
-  "paths": {},
+  "info": {
+    "title": "SHALOM API — Gestión Comercial y Automatización de WhatsApp",
+    "description": "Documentación interactiva de la API de SHALOM. Gestión de productos, inventario, clientes, pedidos, mensajería WhatsApp y analítica financiera.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
   "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "Authorization",
+        "description": "Ingrese el Access Token JWT con el prefijo Bearer",
+        "in": "header"
+      }
+    },
     "schemas": {}
   }
 }
