@@ -8,12 +8,9 @@ import {
   Package,
   Layers,
   ShoppingCart,
-  Users,
   MessageSquare,
   Workflow,
-  DollarSign,
   FileSpreadsheet,
-  Settings,
   ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
@@ -23,12 +20,9 @@ const navigationItems = [
   { name: 'Productos', href: '/products', icon: Package },
   { name: 'Inventario', href: '/inventory', icon: Layers },
   { name: 'Pedidos', href: '/orders', icon: ShoppingCart },
-  { name: 'Clientes CRM', href: '/customers', icon: Users },
   { name: 'WhatsApp', href: '/whatsapp', icon: MessageSquare },
   { name: 'Automatizaciones', href: '/automations', icon: Workflow },
-  { name: 'Finanzas', href: '/finances', icon: DollarSign },
   { name: 'Reportes', href: '/reports', icon: FileSpreadsheet },
-  { name: 'Configuración', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -76,10 +70,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      <div className="p-4 border-t border-border-slate/20 text-xs text-border-slate text-center">
-        v1.0.0 &bull; Producción
-      </div>
     </aside>
   );
 }

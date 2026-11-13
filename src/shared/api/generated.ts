@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/login": {
+    "/api/v1/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -41,7 +41,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/refresh": {
+    "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -61,7 +61,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/logout": {
+    "/api/v1/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -78,7 +78,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me": {
+    "/api/v1/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -95,7 +95,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users": {
+    "/api/v1/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -113,7 +113,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/{id}": {
+    "/api/v1/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -130,7 +130,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/{id}/status": {
+    "/api/v1/users/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -147,7 +147,7 @@ export interface paths {
         patch: operations["UsersController_updateStatus"];
         trace?: never;
     };
-    "/storage/upload": {
+    "/api/v1/storage/upload": {
         parameters: {
             query?: never;
             header?: never;
@@ -164,7 +164,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/categories": {
+    "/api/v1/categories": {
         parameters: {
             query?: never;
             header?: never;
@@ -182,7 +182,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/categories/{id}": {
+    "/api/v1/categories/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -201,7 +201,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/brands": {
+    "/api/v1/brands": {
         parameters: {
             query?: never;
             header?: never;
@@ -219,7 +219,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/brands/{id}": {
+    "/api/v1/brands/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -236,7 +236,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/products": {
+    "/api/v1/products": {
         parameters: {
             query?: never;
             header?: never;
@@ -254,7 +254,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/products/{id}": {
+    "/api/v1/products/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -273,7 +273,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/inventory/movements": {
+    "/api/v1/inventory/movements": {
         parameters: {
             query?: never;
             header?: never;
@@ -291,7 +291,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/inventory/valuation": {
+    "/api/v1/inventory/valuation": {
         parameters: {
             query?: never;
             header?: never;
@@ -308,7 +308,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/inventory/alerts": {
+    "/api/v1/inventory/alerts": {
         parameters: {
             query?: never;
             header?: never;
@@ -325,60 +325,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/customers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar clientes CRM con búsqueda, filtro por etiquetas y paginación */
-        get: operations["CustomersController_findAll"];
-        put?: never;
-        /** Registrar nuevo cliente con normalización E.164 (+57) */
-        post: operations["CustomersController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener ficha CRM del cliente con historial de pedidos y conversaciones */
-        get: operations["CustomersController_findOne"];
-        /** Actualizar información o etiquetas de un cliente */
-        put: operations["CustomersController_update"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/customers/{id}/addresses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Agregar nueva dirección de entrega para el cliente */
-        post: operations["CustomersController_addAddress"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/orders": {
+    "/api/v1/orders": {
         parameters: {
             query?: never;
             header?: never;
@@ -396,7 +343,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/orders/{id}": {
+    "/api/v1/orders/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -413,7 +360,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/orders/{id}/status": {
+    "/api/v1/orders/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -430,7 +377,7 @@ export interface paths {
         patch: operations["OrdersController_changeStatus"];
         trace?: never;
     };
-    "/payments/methods": {
+    "/api/v1/payments/methods": {
         parameters: {
             query?: never;
             header?: never;
@@ -447,7 +394,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/payments/order/{orderId}": {
+    "/api/v1/payments/order/{orderId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -464,7 +411,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/payments": {
+    "/api/v1/payments": {
         parameters: {
             query?: never;
             header?: never;
@@ -481,7 +428,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/payments/{id}/confirm": {
+    "/api/v1/payments/{id}/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -498,94 +445,7 @@ export interface paths {
         patch: operations["PaymentsController_confirmPayment"];
         trace?: never;
     };
-    "/api/v1/expenses/categories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar todas las categorías de gastos */
-        get: operations["ExpensesController_listCategories"];
-        put?: never;
-        /** Crear una nueva categoría de gastos */
-        post: operations["ExpensesController_createCategory"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/expenses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar gastos operativos con paginación y filtros */
-        get: operations["ExpensesController_list"];
-        put?: never;
-        /** Registrar un nuevo gasto operativo */
-        post: operations["ExpensesController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/expenses/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Eliminar un gasto operativo */
-        delete: operations["ExpensesController_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/finance/summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener resumen financiero detallado (Ventas, COGS, Ganancia Bruta, OPEX, Ganancia Neta, ROI) */
-        get: operations["FinanceController_getSummary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/finance/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar transacciones del libro mayor financiero con filtros y paginación */
-        get: operations["FinanceController_getTransactions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/dashboard/metrics": {
+    "/api/v1/api/v1/dashboard/metrics": {
         parameters: {
             query?: never;
             header?: never;
@@ -602,7 +462,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/dashboard/chart-series": {
+    "/api/v1/api/v1/dashboard/chart-series": {
         parameters: {
             query?: never;
             header?: never;
@@ -619,7 +479,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/dashboard/status-distribution": {
+    "/api/v1/api/v1/dashboard/status-distribution": {
         parameters: {
             query?: never;
             header?: never;
@@ -636,7 +496,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/dashboard/top-products": {
+    "/api/v1/api/v1/dashboard/top-products": {
         parameters: {
             query?: never;
             header?: never;
@@ -653,7 +513,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/reports/export": {
+    "/api/v1/api/v1/reports/export": {
         parameters: {
             query?: never;
             header?: never;
@@ -670,7 +530,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/instances": {
+    "/api/v1/api/v1/whatsapp/instances": {
         parameters: {
             query?: never;
             header?: never;
@@ -687,7 +547,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/instances/connect": {
+    "/api/v1/api/v1/whatsapp/instances/connect": {
         parameters: {
             query?: never;
             header?: never;
@@ -704,7 +564,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/instances/disconnect": {
+    "/api/v1/api/v1/whatsapp/instances/disconnect": {
         parameters: {
             query?: never;
             header?: never;
@@ -721,7 +581,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/conversations": {
+    "/api/v1/api/v1/whatsapp/conversations": {
         parameters: {
             query?: never;
             header?: never;
@@ -738,7 +598,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/conversations/{id}/messages": {
+    "/api/v1/api/v1/whatsapp/conversations/{id}/messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -756,7 +616,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/whatsapp/conversations/{id}/quick-order": {
+    "/api/v1/api/v1/whatsapp/conversations/{id}/quick-order": {
         parameters: {
             query?: never;
             header?: never;
@@ -773,7 +633,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/webhooks/evolution": {
+    "/api/v1/api/v1/webhooks/evolution": {
         parameters: {
             query?: never;
             header?: never;
@@ -790,7 +650,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/automations": {
+    "/api/v1/api/v1/automations": {
         parameters: {
             query?: never;
             header?: never;
@@ -808,7 +668,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/automations/{id}": {
+    "/api/v1/api/v1/automations/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -826,7 +686,7 @@ export interface paths {
         patch: operations["AutomationsController_update"];
         trace?: never;
     };
-    "/api/v1/automations/{id}/versions": {
+    "/api/v1/api/v1/automations/{id}/versions": {
         parameters: {
             query?: never;
             header?: never;
@@ -843,7 +703,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/automations/{id}/versions/{versionId}/publish": {
+    "/api/v1/api/v1/automations/{id}/versions/{versionId}/publish": {
         parameters: {
             query?: never;
             header?: never;
@@ -860,7 +720,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/automations/trigger": {
+    "/api/v1/api/v1/automations/trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -877,7 +737,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/automations/{id}/executions": {
+    "/api/v1/api/v1/automations/{id}/executions": {
         parameters: {
             query?: never;
             header?: never;
@@ -1103,61 +963,6 @@ export interface components {
             /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
             referenceId?: string;
         };
-        CreateCustomerAddressDto: {
-            /** @example Calle 100 # 15-20 */
-            street: string;
-            /** @example Apto 402, Torre B */
-            detail?: string;
-            /** @example Bogotá */
-            city: string;
-            /** @example Cundinamarca */
-            state: string;
-            /**
-             * @default Colombia
-             * @example Colombia
-             */
-            country: string;
-            /** @example 110111 */
-            postalCode?: string;
-        };
-        CreateCustomerDto: {
-            /** @example Mariana */
-            firstName: string;
-            /** @example Rodríguez */
-            lastName?: string;
-            /**
-             * @description Teléfono del cliente. Se normaliza automáticamente a E.164 (+573001234567)
-             * @example 3001234567
-             */
-            phone: string;
-            /** @example mariana.rodriguez@example.com */
-            email?: string;
-            /** @example Cliente frecuente de WhatsApp, prefiere despachos en la mañana */
-            notes?: string;
-            address?: components["schemas"]["CreateCustomerAddressDto"];
-            /** @example [
-             *       "VIP",
-             *       "WhatsApp"
-             *     ] */
-            tags?: string[];
-        };
-        UpdateCustomerDto: {
-            /** @example Mariana */
-            firstName: string;
-            /** @example Rodríguez */
-            lastName: string;
-            /** @example +573001234567 */
-            phone: string;
-            /** @example mariana.nuevo@example.com */
-            email: string;
-            /** @example Notas actualizadas */
-            notes: string;
-            /** @example [
-             *       "VIP",
-             *       "Recurrente"
-             *     ] */
-            tags?: string[];
-        };
         CreateOrderItemDto: {
             /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
             variantId: string;
@@ -1203,31 +1008,6 @@ export interface components {
             amount: number;
             /** @example NEQUI-TRANS-9874521 */
             referenceNumber?: string;
-            /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
-            voucherFileId?: string;
-        };
-        CreateExpenseCategoryDto: {
-            /** @example Publicidad Digital */
-            name: string;
-            /** @example Campañas de Meta Ads, Google Ads y TikTok Ads */
-            description?: string;
-        };
-        CreateExpenseDto: {
-            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
-            categoryId: string;
-            /**
-             * @description Monto del egreso en COP
-             * @example 350000
-             */
-            amount: number;
-            /** @example Campaña publicitaria de WhatsApp en Meta Ads */
-            description: string;
-            /** @example 2026-11-04 */
-            date: string;
-            /** @example Meta Platforms Inc. */
-            supplier?: string;
-            /** @example b1c2d3e4-f5a6-7890-bcde-fa1234567890 */
-            methodId?: string;
             /** @example c1d2e3f4-a5b6-7890-bcde-fa1234567890 */
             voucherFileId?: string;
         };
@@ -1909,123 +1689,6 @@ export interface operations {
             };
         };
     };
-    CustomersController_findAll: {
-        parameters: {
-            query?: {
-                /** @description Búsqueda por nombre, teléfono E.164 o correo */
-                search?: string;
-                tag?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CustomersController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCustomerDto"];
-            };
-        };
-        responses: {
-            /** @description Cliente creado */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description El número de teléfono ya se encuentra registrado */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CustomersController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CustomersController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCustomerDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CustomersController_addAddress: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCustomerAddressDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     OrdersController_findAll: {
         parameters: {
             query?: {
@@ -2192,152 +1855,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Pago confirmado exitosamente */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ExpensesController_listCategories: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ExpensesController_createCategory: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateExpenseCategoryDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ExpensesController_list: {
-        parameters: {
-            query?: {
-                categoryId?: string;
-                startDate?: string;
-                endDate?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ExpensesController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateExpenseDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ExpensesController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    FinanceController_getSummary: {
-        parameters: {
-            query?: {
-                /** @description Fecha inicial (YYYY-MM-DD) */
-                startDate?: string;
-                /** @description Fecha final (YYYY-MM-DD) */
-                endDate?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    FinanceController_getTransactions: {
-        parameters: {
-            query?: {
-                type?: "INCOME_SALE" | "EXPENSE_OPERATIONAL" | "EXPENSE_PURCHASE" | "REFUND";
-                startDate?: string;
-                endDate?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
