@@ -42,3 +42,7 @@ Thumbs.db
 # Temporary
 tmp/
 *.tmp
+
+# Agent Teams Lite / local orchestration artifacts
+atl/
+.atl/
