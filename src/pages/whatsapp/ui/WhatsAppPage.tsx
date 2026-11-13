@@ -12,7 +12,6 @@ import {
   Check,
   User,
   ShoppingBag,
-  Plus,
   Paperclip,
   Tag,
   Phone,
@@ -101,15 +100,47 @@ export function WhatsAppPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [inputText, setInputText] = useState('');
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(true);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
-  // Formulario de Pedido Rápido desde WhatsApp
+  // Formulario Tomar Pedido
   const [selectedProduct, setSelectedProduct] = useState('TSH-WHT-001 (Camiseta Básica Blanca - M)');
-  const [quantity, setQuantity] = useState(2);
+  const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState(50000);
   const [shippingCost, setShippingCost] = useState(15000);
 
   const activeConv = conversations.find((c) => c.id === selectedConvId) || conversations[0];
+
+  const handleTakeOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    const orderTotal = quantity * unitPrice + shippingCost;
+    const orderNumber = `SH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const confirmationMsg: MockMessage = {
+      id: `msg-order-${Date.now()}`,
+      sender: 'AGENT',
+      text: `🛍️ ¡Hola ${activeConv.customerName}! Tu pedido *#${orderNumber}* ha sido tomado exitosamente por un total de *${formatCOP(orderTotal)}* (${quantity} uds de ${selectedProduct} + flete). En breve te compartiremos la guía de despacho.`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'DELIVERED',
+    };
+
+    setConversations(
+      conversations.map((c) => {
+        if (c.id === selectedConvId) {
+          return {
+            ...c,
+            totalOrders: c.totalOrders + 1,
+            totalSpent: c.totalSpent + orderTotal,
+            lastMessage: `Pedido #${orderNumber} tomado (${formatCOP(orderTotal)})`,
+            messages: [...c.messages, confirmationMsg],
+          };
+        }
+        return c;
+      }),
+    );
+
+    setIsOrderModalOpen(false);
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,37 +171,6 @@ export function WhatsAppPage() {
     setInputText('');
   };
 
-  const handleCreateQuickOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    const orderTotal = quantity * unitPrice + shippingCost;
-    const orderNumber = `SH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const confirmationMsg: MockMessage = {
-      id: `msg-order-${Date.now()}`,
-      sender: 'AGENT',
-      text: `🛍️ ¡Hola ${activeConv.customerName}! Tu pedido *#${orderNumber}* ha sido generado exitosamente por un total de *${formatCOP(orderTotal)}* (${quantity} uds de ${selectedProduct} + flete). En breve te compartiremos el enlace de pago o guía de despacho.`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'DELIVERED',
-    };
-
-    setConversations(
-      conversations.map((c) => {
-        if (c.id === selectedConvId) {
-          return {
-            ...c,
-            totalOrders: c.totalOrders + 1,
-            totalSpent: c.totalSpent + orderTotal,
-            lastMessage: `Pedido #${orderNumber} generado (${formatCOP(orderTotal)})`,
-            messages: [...c.messages, confirmationMsg],
-          };
-        }
-        return c;
-      }),
-    );
-
-    setIsQuickOrderOpen(false);
-  };
-
   const filteredConversations = conversations.filter(
     (c) =>
       c.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -186,7 +186,7 @@ export function WhatsAppPage() {
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-lg text-primary-base flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-active-green" />
-                WhatsApp Inbox
+                Inbox
               </h2>
               <button
                 type="button"
@@ -264,14 +264,30 @@ export function WhatsAppPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsQuickOrderOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-base text-white rounded-lg text-xs font-semibold hover:bg-primary-base/90 shadow-sm transition"
-            >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              Crear Pedido Rápido
-            </button>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsOrderModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-base text-white rounded-lg text-xs font-semibold hover:bg-primary-base/90 shadow-sm transition"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Tomar Pedido</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsProfileOpen((prev) => !prev)}
+                title={isProfileOpen ? 'Ocultar perfil del cliente' : 'Ver perfil del cliente'}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                  isProfileOpen
+                    ? 'bg-deep-olive/10 text-deep-olive border-deep-olive/30 hover:bg-deep-olive/20'
+                    : 'bg-surface-light hover:bg-border-slate/20 text-primary-base border-border-slate/30'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>{isProfileOpen ? 'Ocultar Perfil' : 'Perfil del Cliente'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Mensajes del chat */}
@@ -365,94 +381,97 @@ export function WhatsAppPage() {
           </form>
         </section>
 
-        {/* COLUMNA 3: CONTEXTO CRM & CREAR PEDIDO */}
-        <aside className="w-80 border-l border-border-slate/30 bg-white p-5 flex flex-col justify-between overflow-y-auto hidden lg:flex">
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-sm text-primary-base">Perfil del Cliente CRM</h3>
-              <p className="text-xs text-muted-dark">Datos consolidados del comprador</p>
-            </div>
-
-            <div className="p-4 bg-surface-light rounded-xl border border-border-slate/20 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-deep-olive/20 text-deep-olive font-bold text-base flex items-center justify-center">
-                  {activeConv.customerName.charAt(0)}
-                </div>
+        {/* COLUMNA 3: PERFIL DEL CLIENTE */}
+        {isProfileOpen && (
+          <aside className="w-80 border-l border-border-slate/30 bg-white p-5 flex flex-col justify-between overflow-y-auto hidden lg:flex">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-xs text-primary-base">{activeConv.customerName}</h4>
-                  <div className="text-xs font-mono text-muted-dark">{activeConv.phone}</div>
+                  <h3 className="font-bold text-sm text-primary-base">Perfil del Cliente</h3>
+                  <p className="text-xs text-muted-dark">Datos consolidados del comprador</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen(false)}
+                  title="Cerrar perfil"
+                  className="p-1.5 text-muted-dark hover:text-primary-base hover:bg-surface-light rounded-lg transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-4 bg-surface-light rounded-xl border border-border-slate/20 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-deep-olive/20 text-deep-olive font-bold text-base flex items-center justify-center">
+                    {activeConv.customerName.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-primary-base">{activeConv.customerName}</h4>
+                    <div className="text-xs font-mono text-muted-dark">{activeConv.phone}</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border-slate/20">
+                  {activeConv.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-deep-olive/10 text-deep-olive"
+                    >
+                      <Tag className="w-2.5 h-2.5" />
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border-slate/20">
-                {activeConv.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-deep-olive/10 text-deep-olive"
-                  >
-                    <Tag className="w-2.5 h-2.5" />
-                    {tag}
-                  </span>
-                ))}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
+                  <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Pedidos</span>
+                  <div className="text-base font-bold text-primary-base mt-0.5">{activeConv.totalOrders}</div>
+                </div>
+                <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
+                  <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Total Gastado</span>
+                  <div className="text-sm font-bold text-emerald-700 mt-0.5">{formatCOP(activeConv.totalSpent)}</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-primary-base flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-muted-dark" />
+                  Historial de Acciones
+                </span>
+                <p className="text-xs text-muted-dark leading-relaxed">
+                  El cliente interactúa regularmente por WhatsApp. Se ha identificado su número bajo el formato internacional E.164.
+                </p>
               </div>
             </div>
+          </aside>
+        )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
-                <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Pedidos</span>
-                <div className="text-base font-bold text-primary-base mt-0.5">{activeConv.totalOrders}</div>
-              </div>
-              <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
-                <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Total Gastado</span>
-                <div className="text-sm font-bold text-emerald-700 mt-0.5">{formatCOP(activeConv.totalSpent)}</div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-primary-base flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-muted-dark" />
-                Historial de Acciones
-              </span>
-              <p className="text-xs text-muted-dark leading-relaxed">
-                El cliente interactúa regularmente por WhatsApp. Se ha identificado su número bajo el formato internacional E.164.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsQuickOrderOpen(true)}
-            className="w-full py-2.5 bg-deep-olive text-white rounded-lg text-xs font-semibold hover:bg-deep-olive/90 shadow-sm transition flex items-center justify-center gap-2 mt-6"
-          >
-            <Plus className="w-4 h-4" />
-            Crear Pedido desde Chat
-          </button>
-        </aside>
-
-        {/* MODAL CREAR PEDIDO RÁPIDO */}
-        {isQuickOrderOpen && (
+        {/* MODAL TOMAR PEDIDO */}
+        {isOrderModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl border border-border-slate/30 shadow-2xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between border-b border-border-slate/20 pb-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <div className="p-2 bg-deep-olive/10 text-deep-olive rounded-lg">
                     <ShoppingBag className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-primary-base">Crear Pedido Comercial Rápido</h3>
+                    <h3 className="text-base font-bold text-primary-base">Tomar Pedido Comercial</h3>
                     <p className="text-xs text-muted-dark">Para {activeConv.customerName} ({activeConv.phone})</p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsQuickOrderOpen(false)}
-                  className="p-1.5 text-muted-dark hover:text-primary-base rounded-lg"
+                  onClick={() => setIsOrderModalOpen(false)}
+                  className="p-1.5 text-muted-dark hover:text-primary-base rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateQuickOrder} className="space-y-4">
+              <form onSubmit={handleTakeOrder} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-muted-dark uppercase tracking-wider mb-1">
                     Producto / Variante *
@@ -460,7 +479,7 @@ export function WhatsAppPage() {
                   <select
                     value={selectedProduct}
                     onChange={(e) => setSelectedProduct(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-border-slate/40 text-xs focus:outline-none focus:ring-2 focus:ring-deep-olive"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-border-slate/40 text-xs focus:outline-none focus:ring-2 focus:ring-deep-olive bg-white"
                   >
                     <option value="TSH-WHT-001 (Camiseta Básica Blanca - M)">
                       TSH-WHT-001 — Camiseta Básica Blanca (Talla M) - $50.000 COP
@@ -526,16 +545,16 @@ export function WhatsAppPage() {
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-border-slate/20">
                   <button
                     type="button"
-                    onClick={() => setIsQuickOrderOpen(false)}
-                    className="px-4 py-2 border border-border-slate/40 rounded-lg text-xs font-medium text-muted-dark hover:bg-surface-light"
+                    onClick={() => setIsOrderModalOpen(false)}
+                    className="px-4 py-2 border border-border-slate/40 rounded-lg text-xs font-medium text-muted-dark hover:bg-surface-light transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-primary-base text-white rounded-lg text-xs font-semibold hover:bg-primary-base/90 shadow-sm"
+                    className="px-5 py-2 bg-primary-base text-white rounded-lg text-xs font-semibold hover:bg-primary-base/90 shadow-sm transition"
                   >
-                    Generar Pedido & Enviar Confirmación
+                    Registrar Pedido
                   </button>
                 </div>
               </form>
