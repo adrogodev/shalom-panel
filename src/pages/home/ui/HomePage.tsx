@@ -6,11 +6,8 @@ import { formatCOP } from '@/shared/lib/utils';
 import {
   Activity,
   ShoppingBag,
-  Users,
-  DollarSign,
   TrendingUp,
   TrendingDown,
-  AlertTriangle,
   ArrowUpRight,
   Package,
 } from 'lucide-react';
@@ -36,18 +33,16 @@ interface MetricItem {
 interface DashboardMetrics {
   sales: MetricItem;
   orders: MetricItem;
-  netProfit: MetricItem;
-  customers: MetricItem;
   lowStockAlerts: number;
 }
 
 const mockChartData = [
-  { date: '10-25', sales: 1250000, expenses: 320000 },
-  { date: '10-27', sales: 1890000, expenses: 450000 },
-  { date: '10-29', sales: 2450000, expenses: 600000 },
-  { date: '10-31', sales: 3100000, expenses: 820000 },
-  { date: '11-02', sales: 2800000, expenses: 410000 },
-  { date: '11-04', sales: 4200000, expenses: 950000 },
+  { date: '10-25', sales: 1250000 },
+  { date: '10-27', sales: 1890000 },
+  { date: '10-29', sales: 2450000 },
+  { date: '10-31', sales: 3100000 },
+  { date: '11-02', sales: 2800000 },
+  { date: '11-04', sales: 4200000 },
 ];
 
 const mockStatusData = [
@@ -72,8 +67,6 @@ export function HomePage() {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     sales: { current: 18655000, previous: 14200000, deltaPercent: 31.4, trend: 'up' },
     orders: { current: 142, previous: 118, deltaPercent: 20.3, trend: 'up' },
-    netProfit: { current: 7240000, previous: 5120000, deltaPercent: 41.4, trend: 'up' },
-    customers: { current: 89, previous: 71, deltaPercent: 25.3, trend: 'up' },
     lowStockAlerts: 3,
   });
 
@@ -87,7 +80,7 @@ export function HomePage() {
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border-slate/30 pb-5">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-primary-base">
-              SHALOM — Panel de Control
+              SHALOM
             </h1>
             <p className="text-muted-dark text-sm mt-1">
               Plataforma Integral de Gestión Comercial, Pedidos y Automatización de WhatsApp
@@ -132,26 +125,8 @@ export function HomePage() {
           </div>
         </header>
 
-        {/* Alerta de Stock Bajo */}
-        {metrics.lowStockAlerts > 0 && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-amber-800 text-sm">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-              <span>
-                <strong>Atención:</strong> Tienes <strong>{metrics.lowStockAlerts} variantes de productos</strong> con stock igual o inferior al umbral mínimo de seguridad.
-              </span>
-            </div>
-            <a
-              href="/inventory"
-              className="inline-flex items-center gap-1 font-semibold text-amber-900 hover:underline shrink-0"
-            >
-              Revisar Kardex <ArrowUpRight className="w-4 h-4" />
-            </a>
-          </div>
-        )}
-
         {/* Tarjetas KPI */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Ventas Reconocidas */}
           <div className="p-6 bg-white rounded-xl border border-border-slate/20 shadow-sm space-y-3">
             <div className="flex items-center justify-between text-muted-dark">
@@ -178,21 +153,21 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Ganancia Neta */}
+          {/* Pedidos Activos */}
           <div className="p-6 bg-white rounded-xl border border-border-slate/20 shadow-sm space-y-3">
             <div className="flex items-center justify-between text-muted-dark">
-              <span className="text-xs font-semibold uppercase tracking-wider">Ganancia Neta</span>
-              <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
-                <DollarSign className="w-4 h-4" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Pedidos Activos</span>
+              <div className="p-2 bg-blue-50 text-blue-700 rounded-lg">
+                <ShoppingBag className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-emerald-700">{formatCOP(metrics.netProfit.current)}</div>
+            <div className="text-2xl font-bold text-primary-base">{metrics.orders.current}</div>
             <div className="flex items-center gap-2 text-xs">
               <span className="inline-flex items-center font-semibold text-emerald-600">
                 <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                +{metrics.netProfit.deltaPercent}%
+                +{metrics.orders.deltaPercent}%
               </span>
-              <span className="text-muted-dark">Margen Neto ~38.8%</span>
+              <span className="text-muted-dark">En gestión</span>
             </div>
           </div>
 
@@ -213,59 +188,20 @@ export function HomePage() {
               <span className="text-muted-dark">Conversaciones activas</span>
             </div>
           </div>
-
-          {/* Pedidos Activos */}
-          <div className="p-6 bg-white rounded-xl border border-border-slate/20 shadow-sm space-y-3">
-            <div className="flex items-center justify-between text-muted-dark">
-              <span className="text-xs font-semibold uppercase tracking-wider">Pedidos Activos</span>
-              <div className="p-2 bg-blue-50 text-blue-700 rounded-lg">
-                <ShoppingBag className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-primary-base">{metrics.orders.current}</div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center font-semibold text-emerald-600">
-                <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                +{metrics.orders.deltaPercent}%
-              </span>
-              <span className="text-muted-dark">Ticket Prom. ~{formatCOP(131373)}</span>
-            </div>
-          </div>
-
-          {/* Clientes CRM */}
-          <div className="p-6 bg-white rounded-xl border border-border-slate/20 shadow-sm space-y-3">
-            <div className="flex items-center justify-between text-muted-dark">
-              <span className="text-xs font-semibold uppercase tracking-wider">Clientes CRM</span>
-              <div className="p-2 bg-purple-50 text-purple-700 rounded-lg">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-primary-base">{metrics.customers.current}</div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center font-semibold text-emerald-600">
-                <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                +{metrics.customers.deltaPercent}%
-              </span>
-              <span className="text-muted-dark">WhatsApp Chats activos</span>
-            </div>
-          </div>
         </section>
 
         {/* Gráficos Analíticos */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Evolución de Ventas vs Egresos */}
+          {/* Evolución de Ventas */}
           <div className="lg:col-span-2 p-6 bg-white rounded-xl border border-border-slate/20 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-primary-base">Evolución Comercial</h2>
-                <p className="text-xs text-muted-dark">Ventas reconocidas vs Egresos operativos (COP)</p>
+                <p className="text-xs text-muted-dark">Ventas reconocidas en el período (COP)</p>
               </div>
               <div className="flex items-center gap-4 text-xs">
                 <span className="flex items-center gap-1.5 text-primary-base font-medium">
                   <span className="w-3 h-3 bg-deep-olive rounded-sm inline-block" /> Ventas
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-dark font-medium">
-                  <span className="w-3 h-3 bg-rose-400 rounded-sm inline-block" /> Gastos
                 </span>
               </div>
             </div>
@@ -278,10 +214,6 @@ export function HomePage() {
                       <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#2B4C3F" stopOpacity={0.4} />
                         <stop offset="95%" stopColor="#2B4C3F" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="expensesGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#E57373" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#E57373" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#717E80" fontSize={12} tickLine={false} />
@@ -302,14 +234,6 @@ export function HomePage() {
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#salesGrad)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="expenses"
-                      stroke="#E57373"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#expensesGrad)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
