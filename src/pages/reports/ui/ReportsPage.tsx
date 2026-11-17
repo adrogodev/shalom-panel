@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { AdminLayout } from '@/widgets/layout';
+import { apiDownload, NETWORK_ERROR_MESSAGE, SESSION_EXPIRED_MESSAGE } from '@/shared/api';
 import {
   FileSpreadsheet,
   Download,
@@ -13,6 +14,7 @@ import {
   CheckCircle,
   FileText,
   Clock,
+  AlertCircle,
 } from 'lucide-react';
 
 interface ReportCardProps {
@@ -74,6 +76,23 @@ function ReportCard({
   );
 }
 
+const REPORT_LABELS: Record<string, string> = {
+  SALES: 'ventas',
+  INVENTORY: 'inventario',
+  CUSTOMERS: 'clientes',
+  EXPENSES: 'gastos',
+};
+
+function toFriendlyExportError(err: unknown): string {
+  const message = err instanceof Error ? err.message : '';
+  if (message === NETWORK_ERROR_MESSAGE || message === SESSION_EXPIRED_MESSAGE) {
+    return message;
+  }
+  return message
+    ? `No se pudo generar el reporte: ${message}`
+    : 'No se pudo generar el reporte. Inténtalo de nuevo en unos minutos.';
+}
+
 export function ReportsPage() {
   const [startDate, setStartDate] = useState(
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -81,65 +100,32 @@ export function ReportsPage() {
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [exportingType, setExportingType] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleExport = async (type: string, format: 'csv' | 'json') => {
     setExportingType(`${type}-${format}`);
     setFeedback(null);
+    setErrorMessage(null);
 
     try {
-      // Intentar llamar al backend si está disponible o generar archivo local
-      const response = await fetch('/api/v1/reports/export', {
+      const { blob, filename } = await apiDownload('/reports/export', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, format, startDate, endDate }),
-      }).catch(() => null);
+      });
 
-      if (response && response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte-${type.toLowerCase()}-${endDate}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } else {
-        // Generador fallback directo en el cliente para máxima fiabilidad
-        let dummyCsv = '';
-        if (type === 'SALES') {
-          dummyCsv =
-            '"Numero Pedido","Fecha","Cliente","Telefono","Estado","Subtotal (COP)","Descuento","Envio","Total (COP)"\n' +
-            `"SH-2026-0004","2026-11-04","Valentina Mejia","+573001234567","CONFIRMED","145000","0","0","145000"\n` +
-            `"SH-2026-0003","2026-11-03","Carlos Mario Restrepo","+573109876543","DELIVERED","220000","0","0","220000"`;
-        } else if (type === 'INVENTORY') {
-          dummyCsv =
-            '"Producto","SKU","Categoria","Stock Total","Reservado","Disponible","Costo Compra","Precio Venta","Valorizacion"\n' +
-            `"Camiseta Basica Premium","TSH-WHT-001","Camisetas","50","2","48","25000","50000","1250000"\n` +
-            `"Pantalon Jean Slim Fit","JEA-SLM-002","Pantalones","30","1","29","55000","110000","1650000"`;
-        } else if (type === 'CUSTOMERS') {
-          dummyCsv =
-            '"Nombre Cliente","Telefono","Email","Total Pedidos","Total Gastado (COP)","Fecha Registro"\n' +
-            `"Valentina Mejia","+573001234567","valentina@cliente.com","4","640000","2026-10-15"\n` +
-            `"Carlos Mario Restrepo","+573109876543","carlos@cliente.com","3","480000","2026-10-18"`;
-        } else {
-          dummyCsv =
-            '"Fecha","Categoria","Descripcion","Proveedor","Monto (COP)","Metodo Pago"\n' +
-            `"2026-11-04","Publicidad Digital","Campana Meta Ads WhatsApp","Meta Platforms","450000","Tarjeta Credito"\n` +
-            `"2026-11-02","Empaques y Logistica","Cajas ecologicas 500 uds","Cartones & Empaques SAS","320000","Bancolombia"`;
-        }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || `reporte-${type.toLowerCase()}-${endDate}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
 
-        const blob = new Blob([dummyCsv], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte-${type.toLowerCase()}-${endDate}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
-
-      setFeedback(`Reporte de ${type} descargado exitosamente`);
+      setFeedback(`Reporte de ${REPORT_LABELS[type] ?? type} descargado exitosamente`);
       setTimeout(() => setFeedback(null), 4000);
+    } catch (err) {
+      setErrorMessage(toFriendlyExportError(err));
     } finally {
       setExportingType(null);
     }
@@ -186,6 +172,16 @@ export function ReportsPage() {
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-800 text-sm font-medium animate-in fade-in">
             <CheckCircle className="w-4 h-4 text-emerald-600" />
             {feedback}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div
+            role="alert"
+            className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700 text-sm font-medium animate-in fade-in"
+          >
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{errorMessage}</span>
           </div>
         )}
 

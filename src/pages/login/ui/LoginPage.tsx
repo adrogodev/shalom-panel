@@ -1,12 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LoginForm } from '@/features/authentication';
-import { ShieldCheck } from 'lucide-react';
+import { LoginForm, useRedirectIfAuthenticated } from '@/features/authentication';
+import { SESSION_EXPIRED_MESSAGE } from '@/shared/api';
+import { ShieldCheck, Clock } from 'lucide-react';
 
 export function LoginPage() {
   const router = useRouter();
+  const [sessionExpired, setSessionExpired] = useState(false);
+  useRedirectIfAuthenticated('/');
+
+  // Read the query string after mount to keep server and client markup identical.
+  useEffect(() => {
+    setSessionExpired(new URLSearchParams(window.location.search).get('expired') === '1');
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-light p-4">
@@ -23,7 +31,17 @@ export function LoginPage() {
           </p>
         </div>
 
-        <LoginForm onSuccess={() => router.push('/')} />
+        {sessionExpired && (
+          <div
+            role="status"
+            className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-800 text-sm"
+          >
+            <Clock className="w-4 h-4 shrink-0" />
+            <span>{SESSION_EXPIRED_MESSAGE}</span>
+          </div>
+        )}
+
+        <LoginForm onSuccess={() => router.replace('/')} />
 
         <div className="text-center pt-2 border-t border-border-slate/10">
           <p className="text-xs text-muted-dark/80">

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/features/authentication';
+import { logout, useHydratedSession } from '@/features/authentication';
 import {
   Bell,
   LogOut,
@@ -65,14 +65,20 @@ const initialNotifications: NotificationItem[] = [
 
 export function Header() {
   const router = useRouter();
-  const { user, clearAuth } = useAuthStore();
+  const { user } = useHydratedSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    clearAuth();
-    router.push('/login');
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      router.replace('/login');
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -192,8 +198,10 @@ export function Header() {
           <button
             type="button"
             onClick={handleLogout}
+            disabled={loggingOut}
             title="Cerrar sesión"
-            className="p-1.5 text-muted-dark hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-1"
+            aria-label="Cerrar sesión"
+            className="p-1.5 text-muted-dark hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-1 disabled:opacity-50"
           >
             <LogOut className="w-4 h-4" />
           </button>
