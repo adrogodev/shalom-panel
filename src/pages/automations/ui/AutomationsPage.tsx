@@ -1,17 +1,35 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { AdminLayout } from '@/widgets/layout';
-import { ArrowRight, CheckCircle2, Pencil, Plus, Sparkles, X } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Pencil, Plus, Sparkles, X } from 'lucide-react';
 import { AUTOMATION_TEMPLATES, describeTrigger } from '@/features/automation-builder';
 import { useAutomationsStore } from '../model/automations.store';
 
+export function formatLastRun(iso: string | null, now: Date = new Date()): string {
+  if (!iso) return 'Nunca';
+  const minutes = Math.round((now.getTime() - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return 'Hace un momento';
+  if (minutes < 60) return `Hace ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+  const days = Math.round(hours / 24);
+  return `Hace ${days} ${days === 1 ? 'día' : 'días'}`;
+}
+
 export function AutomationsPage() {
   const automations = useAutomationsStore((state) => state.automations);
+  const status = useAutomationsStore((state) => state.status);
+  const error = useAutomationsStore((state) => state.error);
   const notice = useAutomationsStore((state) => state.notice);
+  const load = useAutomationsStore((state) => state.load);
   const toggleActive = useAutomationsStore((state) => state.toggleActive);
   const dismissNotice = useAutomationsStore((state) => state.dismissNotice);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <AdminLayout>
@@ -90,6 +108,26 @@ export function AutomationsPage() {
             Tus automatizaciones
           </h2>
 
+          {error && (
+            <div role="alert" className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2 text-sm text-rose-800">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span className="flex-1">{error}</span>
+              <button type="button" onClick={() => load()} className="font-semibold underline">
+                Reintentar
+              </button>
+            </div>
+          )}
+
+          {status === 'loading' && automations.length === 0 && (
+            <p className="text-sm text-muted-dark">Cargando tus automatizaciones…</p>
+          )}
+
+          {status === 'ready' && automations.length === 0 && (
+            <p className="p-6 rounded-xl border border-dashed border-border-slate/50 text-sm text-muted-dark text-center">
+              Todavía no tienes automatizaciones. Empieza con una de las ideas de arriba.
+            </p>
+          )}
+
           <ul className="space-y-3">
             {automations.map((automation) => (
               <li
@@ -104,7 +142,7 @@ export function AutomationsPage() {
                   <p className="text-sm text-muted-dark">{automation.summary}</p>
                   <p className="text-xs text-muted-dark pt-1">
                     Se ha usado {automation.timesRun} {automation.timesRun === 1 ? 'vez' : 'veces'} · Última
-                    vez: {automation.lastRun}
+                    vez: {formatLastRun(automation.lastRunAt)}
                   </p>
                 </div>
 

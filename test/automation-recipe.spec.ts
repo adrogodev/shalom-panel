@@ -4,6 +4,8 @@ import {
   validateRecipe,
   renderMessagePreview,
   createRecipeFromTemplate,
+  toStoredDefinition,
+  recipeFromDefinition,
   type AutomationRecipe,
 } from '../src/features/automation-builder';
 
@@ -134,5 +136,26 @@ describe('createRecipeFromTemplate', () => {
 
     expect(validateRecipe(first)).toEqual([]);
     expect(first.steps[0].id).not.toBe(second.steps[0].id);
+  });
+});
+
+describe('stored definition round-trip', () => {
+  it('keeps the recipe inside the definition so the editor can reopen it', () => {
+    const recipe = createRecipeFromTemplate('payment-thanks');
+    const stored = toStoredDefinition(recipe);
+
+    expect(stored.nodes[0].data).toMatchObject({ triggerType: 'PAYMENT_CONFIRMED' });
+    expect(recipeFromDefinition(stored, { name: 'Nuevo nombre', triggerType: 'PAYMENT_CONFIRMED' })).toEqual({
+      ...recipe,
+      name: 'Nuevo nombre',
+    });
+  });
+
+  it('falls back to an empty recipe for its trigger when the definition has no recipe', () => {
+    expect(recipeFromDefinition({ nodes: [], edges: [] }, { name: 'Vieja', triggerType: 'MESSAGE_RECEIVED' })).toEqual({
+      name: 'Vieja',
+      trigger: { type: 'MESSAGE_RECEIVED' },
+      steps: [],
+    });
   });
 });

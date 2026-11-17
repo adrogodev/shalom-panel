@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 const push = vi.fn();
 
@@ -11,43 +11,89 @@ vi.mock('@/widgets/layout', () => ({
   AdminLayout: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+vi.mock('../src/pages/automations/api/automations.api', () => ({
+  fetchAutomations: vi.fn(),
+  setAutomationActive: vi.fn(),
+  persistAutomation: vi.fn(),
+}));
+
 import { AutomationsPage, FlowBuilderPage } from '../src/pages/automations';
-import {
-  resetAutomationsStore,
-  useAutomationsStore,
-} from '../src/pages/automations/model/automations.store';
+import { resetAutomationsStore, useAutomationsStore } from '../src/pages/automations/model/automations.store';
+import * as api from '../src/pages/automations/api/automations.api';
+import { createRecipeFromTemplate } from '../src/features/automation-builder';
+
+const fetchAutomations = vi.mocked(api.fetchAutomations);
+const setAutomationActive = vi.mocked(api.setAutomationActive);
+const persistAutomation = vi.mocked(api.persistAutomation);
+
+function serverAutomation(id: string, templateKey: string, isActive: boolean): api.AutomationSummary {
+  const recipe = createRecipeFromTemplate(templateKey);
+  return { id, name: recipe.name, summary: 'Resumen', recipe, isActive, timesRun: 3, lastRunAt: null };
+}
+
+const SERVER_LIST = [
+  serverAutomation('a-1', 'order-confirmation', true),
+  serverAutomation('a-2', 'shipping-notice', false),
+];
 
 beforeEach(() => {
-  push.mockClear();
+  vi.clearAllMocks();
   resetAutomationsStore();
+  fetchAutomations.mockResolvedValue(SERVER_LIST);
+  setAutomationActive.mockResolvedValue();
+  persistAutomation.mockResolvedValue('a-new');
 });
 
 describe('AutomationsPage', () => {
-  it('lists automations in plain language without technical event codes', () => {
+  it('loads the automations from the server and describes them in plain language', async () => {
     render(<AutomationsPage />);
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Automatizaciones' })).toBeInTheDocument();
+    expect(await screen.findByText('Confirmar pedidos nuevos', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getAllByText('Cuando un pedido pasa a "Enviado"').length).toBeGreaterThan(0);
     expect(screen.queryByText(/ORDER_STATUS_CHANGED|ORDER_CREATED|DAG/)).not.toBeInTheDocument();
+    expect(fetchAutomations).toHaveBeenCalledTimes(1);
   });
 
-  it('turns an automation off with its switch', () => {
+  it('turns an automation on through the server', async () => {
     render(<AutomationsPage />);
-    const toggle = screen.getByRole('switch', { name: 'Apagar "Confirmar pedidos nuevos"' });
+    const toggle = await screen.findByRole('switch', { name: 'Encender "Avisar cuando se envía"' });
 
     fireEvent.click(toggle);
 
-    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    await waitFor(() => expect(setAutomationActive).toHaveBeenCalledWith('a-2', true));
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('reverts the switch and explains the problem when the server rejects it', async () => {
+    setAutomationActive.mockRejectedValue(new Error('Error HTTP 500'));
+    render(<AutomationsPage />);
+    const toggle = await screen.findByRole('switch', { name: 'Apagar "Confirmar pedidos nuevos"' });
+
+    fireEvent.click(toggle);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos apagar la automatización');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('shows a friendly message when the list cannot be loaded', async () => {
+    fetchAutomations.mockRejectedValue(new Error('Failed to fetch'));
+    render(<AutomationsPage />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos cargar tus automatizaciones');
+  });
+
+  it('offers the new "pago confirmado" idea', () => {
+    render(<AutomationsPage />);
+
+    expect(screen.getByText('Agradecer pagos recibidos')).toBeInTheDocument();
   });
 });
 
 describe('FlowBuilderPage', () => {
-  it('opens a template as editable steps', () => {
-    render(<FlowBuilderPage automationId="new" templateKey="payment-reminder" />);
+  it('offers the "Cuando se confirma un pago" trigger card', () => {
+    render(<FlowBuilderPage automationId="new" templateKey="payment-thanks" />);
 
-    expect(screen.getByDisplayValue('Recordar pagos pendientes')).toBeInTheDocument();
-    expect(screen.getByText('Esperar 4 horas')).toBeInTheDocument();
-    expect(screen.getByText('Seguir solo si el pedido todavía no está pagado')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cuando se confirma un pago/ })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('explains what is missing and stays open instead of saving an incomplete automation', () => {
@@ -58,62 +104,74 @@ describe('FlowBuilderPage', () => {
     const alert = screen.getByRole('alert');
     expect(alert).toHaveTextContent('Ponle un nombre a la automatización.');
     expect(alert).toHaveTextContent('El paso 1 no tiene mensaje.');
+    expect(persistAutomation).not.toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('"Guardar y encender" closes the editor and adds the automation turned on', () => {
+  it('"Guardar y encender" saves on the server, closes the editor and shows the notice', async () => {
     render(<FlowBuilderPage automationId="new" templateKey="shipping-notice" />);
 
     fireEvent.click(screen.getByRole('button', { name: /Agregar un paso/ }));
     fireEvent.click(screen.getByRole('button', { name: /Esperar un tiempo/ }));
     fireEvent.click(screen.getByRole('button', { name: /Guardar y encender/ }));
 
-    expect(push).toHaveBeenCalledWith('/automations');
-    const [saved] = useAutomationsStore.getState().automations;
-    expect(saved).toMatchObject({ name: 'Avisar cuando se envía', isActive: true });
-    expect(saved.recipe.steps.map((step) => step.kind)).toEqual(['send_message', 'wait']);
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/automations'));
+    expect(persistAutomation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: undefined,
+        isActive: true,
+        summary: 'Enviar un mensaje por WhatsApp, luego esperar 1 hora.',
+        recipe: expect.objectContaining({
+          name: 'Avisar cuando se envía',
+          trigger: { type: 'ORDER_STATUS_CHANGED', statusKey: 'SHIPPED' },
+        }),
+      }),
+    );
     expect(useAutomationsStore.getState().notice).toBe('"Avisar cuando se envía" quedó guardada y encendida.');
   });
 
-  it('"Guardar sin encender" closes the editor and keeps a new automation off', () => {
+  it('"Guardar sin encender" keeps a new automation off', async () => {
     render(<FlowBuilderPage automationId="new" templateKey="order-confirmation" />);
 
     fireEvent.click(screen.getByRole('button', { name: /Guardar sin encender/ }));
 
-    expect(push).toHaveBeenCalledWith('/automations');
-    expect(useAutomationsStore.getState().automations[0]).toMatchObject({
-      name: 'Confirmar pedidos nuevos',
-      isActive: false,
-    });
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/automations'));
+    expect(persistAutomation).toHaveBeenCalledWith(expect.objectContaining({ isActive: false }));
   });
 
-  it('editing an existing automation updates it instead of adding a new one', () => {
-    const before = useAutomationsStore.getState().automations.length;
-    render(<FlowBuilderPage automationId="auto-2" />);
+  it('editing an existing automation saves it under its id and keeps it on', async () => {
+    resetAutomationsStore(SERVER_LIST);
+    render(<FlowBuilderPage automationId="a-1" />);
 
-    fireEvent.change(screen.getByDisplayValue('Recordar pagos pendientes'), {
-      target: { value: 'Recordatorio de pago' },
+    fireEvent.change(screen.getByDisplayValue('Confirmar pedidos nuevos'), {
+      target: { value: 'Confirmación de pedido' },
     });
     fireEvent.click(screen.getByRole('button', { name: /Guardar sin encender/ }));
 
-    const automations = useAutomationsStore.getState().automations;
-    expect(automations).toHaveLength(before);
-    expect(automations.find((a) => a.id === 'auto-2')).toMatchObject({
-      name: 'Recordatorio de pago',
-      isActive: true,
-    });
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    expect(persistAutomation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'a-1',
+        isActive: true,
+        recipe: expect.objectContaining({ name: 'Confirmación de pedido' }),
+      }),
+    );
   });
 
-  it('shows the saved notice on the list after closing the editor', () => {
-    useAutomationsStore.getState().saveAutomation({
-      id: 'new',
-      recipe: { ...useAutomationsStore.getState().automations[0].recipe, name: 'Mi aviso' },
-      isActive: true,
-    });
+  it('stays open and explains the problem when the server cannot save', async () => {
+    persistAutomation.mockRejectedValue(new Error('Error HTTP 500'));
+    render(<FlowBuilderPage automationId="new" templateKey="order-confirmation" />);
 
-    render(<AutomationsPage />);
+    fireEvent.click(screen.getByRole('button', { name: /Guardar y encender/ }));
 
-    expect(screen.getByRole('status')).toHaveTextContent('"Mi aviso" quedó guardada y encendida.');
-    expect(screen.getByText('Mi aviso')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos guardar la automatización');
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('loads an existing automation from the server when opened directly', async () => {
+    render(<FlowBuilderPage automationId="a-2" />);
+
+    expect(await screen.findByDisplayValue('Avisar cuando se envía')).toBeInTheDocument();
+    expect(fetchAutomations).toHaveBeenCalledTimes(1);
   });
 });

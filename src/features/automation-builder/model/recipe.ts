@@ -11,7 +11,8 @@ export type TriggerType =
   | 'ORDER_CREATED'
   | 'ORDER_STATUS_CHANGED'
   | 'CUSTOMER_CREATED'
-  | 'MESSAGE_RECEIVED';
+  | 'MESSAGE_RECEIVED'
+  | 'PAYMENT_CONFIRMED';
 
 export type OrderStatusKey =
   | 'NEW'
@@ -75,6 +76,10 @@ export const TRIGGER_OPTIONS: Record<TriggerType, { title: string; hint: string 
     title: 'Cuando un cliente te escribe por WhatsApp',
     hint: 'Cada vez que entra un mensaje.',
   },
+  PAYMENT_CONFIRMED: {
+    title: 'Cuando se confirma un pago',
+    hint: 'Apenas verificas un abono o pago del cliente.',
+  },
 };
 
 export const ORDER_STATUS_OPTIONS: Record<OrderStatusKey, string> = {
@@ -113,7 +118,6 @@ export const MESSAGE_VARIABLES = [
   { token: '{{numero_pedido}}', label: 'Número de pedido', sample: 'SH-2026-0042' },
   { token: '{{total_pedido}}', label: 'Total del pedido', sample: '$ 185.000' },
   { token: '{{estado_pedido}}', label: 'Estado del pedido', sample: 'Enviado' },
-  { token: '{{guia_envio}}', label: 'Guía de envío', sample: '7012 3456 789' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -240,6 +244,40 @@ function stepToNode(step: RecipeStep, index: number): FlowNode {
   }
 }
 
+/** Stored definition: the engine graph plus the recipe so the editor can reopen it. */
+export interface StoredFlowDefinition extends FlowDefinition {
+  recipe: AutomationRecipe;
+}
+
+export function toStoredDefinition(recipe: AutomationRecipe): StoredFlowDefinition {
+  return { ...buildFlowDefinition(recipe), recipe };
+}
+
+const TRIGGER_TYPES = Object.keys(TRIGGER_OPTIONS) as TriggerType[];
+
+export function isTriggerType(value: unknown): value is TriggerType {
+  return typeof value === 'string' && (TRIGGER_TYPES as string[]).includes(value);
+}
+
+/**
+ * Rebuilds the recipe saved inside a definition. Automations created outside
+ * the guided editor fall back to an empty recipe for their trigger.
+ */
+export function recipeFromDefinition(
+  definition: unknown,
+  fallback: { name: string; triggerType: string },
+): AutomationRecipe {
+  const stored = (definition as Partial<StoredFlowDefinition> | null)?.recipe;
+  if (stored && isTriggerType(stored.trigger?.type) && Array.isArray(stored.steps)) {
+    return { ...stored, name: fallback.name, steps: stored.steps.map((step) => ({ ...step, id: step.id || newStepId() })) };
+  }
+  return {
+    name: fallback.name,
+    trigger: { type: isTriggerType(fallback.triggerType) ? fallback.triggerType : 'ORDER_CREATED' },
+    steps: [],
+  };
+}
+
 export function buildFlowDefinition(recipe: AutomationRecipe): FlowDefinition {
   const triggerNode: FlowNode = {
     id: 'trigger',
@@ -338,13 +376,26 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
     key: 'shipping-notice',
     title: 'Avisar cuando se envía',
-    summary: 'Cuando marcas un pedido como enviado, le comparte la guía al cliente.',
+    summary: 'Cuando marcas un pedido como enviado, le avisa al cliente que va en camino.',
     trigger: { type: 'ORDER_STATUS_CHANGED', statusKey: 'SHIPPED' },
     steps: [
       {
         kind: 'send_message',
         message:
-          '¡Buenas noticias, {{nombre_cliente}}! 🚚 Tu pedido {{numero_pedido}} ya va en camino. Tu número de guía es {{guia_envio}}.',
+          '¡Buenas noticias, {{nombre_cliente}}! 🚚 Tu pedido {{numero_pedido}} ya va en camino. Te avisaremos cualquier novedad.',
+      },
+    ],
+  },
+  {
+    key: 'payment-thanks',
+    title: 'Agradecer pagos recibidos',
+    summary: 'Cuando confirmas un pago, le da las gracias al cliente y le confirma el pedido.',
+    trigger: { type: 'PAYMENT_CONFIRMED' },
+    steps: [
+      {
+        kind: 'send_message',
+        message:
+          '¡Gracias, {{nombre_cliente}}! 🙌 Confirmamos tu pago del pedido {{numero_pedido}}. Ya lo estamos preparando.',
       },
     ],
   },

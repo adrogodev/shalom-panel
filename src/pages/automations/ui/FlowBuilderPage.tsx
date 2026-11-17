@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AdminLayout } from '@/widgets/layout';
@@ -14,12 +14,14 @@ import {
   validateRecipe,
   type AutomationRecipe,
 } from '@/features/automation-builder';
-import { useAutomationsStore } from '../model/automations.store';
+import { useAutomationsStore, type AutomationSummary } from '../model/automations.store';
 
 interface FlowBuilderPageProps {
   automationId: string;
   templateKey?: string;
 }
+
+const NEW_ID = 'new';
 
 function loadInitialRecipe(existing: AutomationRecipe | undefined, templateKey?: string): AutomationRecipe {
   if (existing) return existing;
@@ -32,30 +34,68 @@ function loadInitialRecipe(existing: AutomationRecipe | undefined, templateKey?:
  * language; the engine graph is generated from that description on save.
  */
 export function FlowBuilderPage({ automationId, templateKey }: FlowBuilderPageProps) {
-  const router = useRouter();
+  const isNew = automationId === NEW_ID;
   const existing = useAutomationsStore((state) =>
     state.automations.find((automation) => automation.id === automationId),
   );
+  const status = useAutomationsStore((state) => state.status);
+  const load = useAutomationsStore((state) => state.load);
+
+  useEffect(() => {
+    if (!isNew && !existing && status === 'idle') load();
+  }, [isNew, existing, status, load]);
+
+  if (!isNew && !existing) {
+    return (
+      <AdminLayout>
+        <main className="p-8 max-w-4xl mx-auto space-y-4">
+          <Link
+            href="/automations"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-dark hover:text-primary-base transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver a automatizaciones
+          </Link>
+          <p className="text-sm text-muted-dark">
+            {status === 'loading' || status === 'idle'
+              ? 'Cargando la automatización…'
+              : 'No encontramos esta automatización. Puede que haya sido eliminada.'}
+          </p>
+        </main>
+      </AdminLayout>
+    );
+  }
+
+  return <AutomationEditor key={automationId} existing={existing} templateKey={templateKey} />;
+}
+
+function AutomationEditor({ existing, templateKey }: { existing?: AutomationSummary; templateKey?: string }) {
+  const router = useRouter();
   const saveAutomation = useAutomationsStore((state) => state.saveAutomation);
 
   const isNew = !existing;
   const isActive = existing?.isActive ?? false;
   const [recipe, setRecipe] = useState<AutomationRecipe>(() => loadInitialRecipe(existing?.recipe, templateKey));
   const [problems, setProblems] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const definition = useMemo(() => buildFlowDefinition(recipe), [recipe]);
 
-  const save = (activate: boolean) => {
+  const save = async (activate: boolean) => {
     const found = validateRecipe(recipe);
     if (found.length > 0) {
       setProblems(found);
       return;
     }
 
-    // TODO: send `definition` to POST /automations/:id/versions (and publish when activating)
-    // once the panel is wired to the automations API.
-    saveAutomation({ id: automationId, recipe, isActive: activate || isActive });
-    router.push('/automations');
+    setIsSaving(true);
+    try {
+      await saveAutomation({ id: existing?.id, recipe, isActive: activate || isActive });
+      router.push('/automations');
+    } catch (err) {
+      setProblems([err instanceof Error ? err.message : 'No pudimos guardar la automatización.']);
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -121,7 +161,8 @@ export function FlowBuilderPage({ automationId, templateKey }: FlowBuilderPagePr
           <button
             type="button"
             onClick={() => save(false)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-border-slate/40 text-primary-base rounded-lg text-sm font-semibold hover:bg-surface-light transition"
+            disabled={isSaving}
+            className="disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-border-slate/40 text-primary-base rounded-lg text-sm font-semibold hover:bg-surface-light transition"
           >
             <Save className="w-4 h-4" />
             Guardar sin encender
@@ -129,10 +170,11 @@ export function FlowBuilderPage({ automationId, templateKey }: FlowBuilderPagePr
           <button
             type="button"
             onClick={() => save(true)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-base text-white rounded-lg text-sm font-semibold hover:bg-primary-base/90 shadow-sm transition"
+            disabled={isSaving}
+            className="disabled:opacity-60 disabled:cursor-wait inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-base text-white rounded-lg text-sm font-semibold hover:bg-primary-base/90 shadow-sm transition"
           >
             <Power className="w-4 h-4" />
-            Guardar y encender
+            {isSaving ? 'Guardando…' : 'Guardar y encender'}
           </button>
         </footer>
 
