@@ -19,6 +19,16 @@
   --foreground: #0E0E0E;
 }
 
+/* Hides the scrollbar while keeping wheel, touch and keyboard scrolling. */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

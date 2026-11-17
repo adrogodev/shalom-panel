@@ -30,7 +30,7 @@ export function Sidebar() {
   const currentPath = pathname || '/';
 
   return (
-    <aside className="w-64 bg-primary-base text-surface-light flex flex-col shrink-0 border-r border-border-slate/30 min-h-screen">
+    <aside className="w-64 bg-primary-base text-surface-light flex flex-col shrink-0 border-r border-border-slate/30 h-full">
       <div className="p-5 flex items-center gap-3 border-b border-border-slate/20">
         <div className="p-2 bg-deep-olive/60 rounded-lg text-accent-sage">
           <ShieldCheck className="w-5 h-5" />
@@ -43,7 +43,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-hidden">
         {navigationItems.map((item) => {
           const isActive = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
           const Icon = item.icon;
