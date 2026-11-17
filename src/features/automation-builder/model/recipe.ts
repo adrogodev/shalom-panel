@@ -7,12 +7,18 @@
  * (node types: trigger, send_whatsapp, wait, condition).
  */
 
-export type TriggerType =
+import type { AutomationTriggerOption } from './triggers';
+
+/** Triggers seeded by the server; their key equals their base event. */
+export type SystemTriggerType =
   | 'ORDER_CREATED'
   | 'ORDER_STATUS_CHANGED'
   | 'CUSTOMER_CREATED'
   | 'MESSAGE_RECEIVED'
   | 'PAYMENT_CONFIRMED';
+
+/** Key of a trigger from GET /automations/triggers (system or custom). */
+export type TriggerType = string;
 
 export type OrderStatusKey =
   | 'NEW'
@@ -59,7 +65,8 @@ export interface AutomationRecipe {
 // Plain-language catalogs
 // ---------------------------------------------------------------------------
 
-export const TRIGGER_OPTIONS: Record<TriggerType, { title: string; hint: string }> = {
+/** Labels for the system triggers, used when the server catalog is not loaded. */
+export const TRIGGER_OPTIONS: Record<SystemTriggerType, { title: string; hint: string }> = {
   ORDER_CREATED: {
     title: 'Cuando llega un pedido nuevo',
     hint: 'Apenas registras o recibes un pedido.',
@@ -129,11 +136,13 @@ export function formatWait(amount: number, unit: WaitUnit): string {
   return `${amount} ${amount === 1 ? labels.one : labels.many}`;
 }
 
-export function describeTrigger(trigger: RecipeTrigger): string {
+export function describeTrigger(trigger: RecipeTrigger, triggers: AutomationTriggerOption[] = []): string {
   if (trigger.type === 'ORDER_STATUS_CHANGED' && trigger.statusKey) {
     return `Cuando un pedido pasa a "${ORDER_STATUS_OPTIONS[trigger.statusKey]}"`;
   }
-  return TRIGGER_OPTIONS[trigger.type].title;
+  const fromCatalog = triggers.find((option) => option.key === trigger.type);
+  if (fromCatalog) return fromCatalog.name;
+  return TRIGGER_OPTIONS[trigger.type as SystemTriggerType]?.title ?? 'Cuando ocurre un evento personalizado';
 }
 
 export function describeStep(step: RecipeStep): string {
@@ -253,10 +262,8 @@ export function toStoredDefinition(recipe: AutomationRecipe): StoredFlowDefiniti
   return { ...buildFlowDefinition(recipe), recipe };
 }
 
-const TRIGGER_TYPES = Object.keys(TRIGGER_OPTIONS) as TriggerType[];
-
 export function isTriggerType(value: unknown): value is TriggerType {
-  return typeof value === 'string' && (TRIGGER_TYPES as string[]).includes(value);
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 /**

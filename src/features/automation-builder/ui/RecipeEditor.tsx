@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Plus,
   ShieldCheck,
+  Sparkles,
   Trash2,
   Zap,
 } from 'lucide-react';
@@ -26,9 +27,12 @@ import {
   type OrderStatusKey,
   type RecipeStep,
   type RecipeStepKind,
+  type SystemTriggerType,
   type TriggerType,
   type WaitUnit,
 } from '../model/recipe';
+import { useTriggersStore } from '../model/triggers.store';
+import { CreateTriggerForm } from './CreateTriggerForm';
 
 interface RecipeEditorProps {
   recipe: AutomationRecipe;
@@ -138,6 +142,16 @@ function SectionTitle({
 }
 
 function TriggerSection({ recipe, onChange }: RecipeEditorProps) {
+  const triggers = useTriggersStore((state) => state.triggers);
+  const status = useTriggersStore((state) => state.status);
+  const error = useTriggersStore((state) => state.error);
+  const load = useTriggersStore((state) => state.load);
+  const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    if (status === 'idle') load();
+  }, [status, load]);
+
   const selectTrigger = (type: TriggerType) =>
     onChange({
       ...recipe,
@@ -147,22 +161,46 @@ function TriggerSection({ recipe, onChange }: RecipeEditorProps) {
           : { type },
     });
 
+  // Cards come from the server catalog; the system ones stay usable if it cannot be loaded.
+  const options =
+    triggers.length > 0
+      ? triggers.map((trigger) => ({ key: trigger.key, title: trigger.name, hint: trigger.description ?? '' }))
+      : status === 'error'
+        ? (Object.keys(TRIGGER_OPTIONS) as SystemTriggerType[]).map((key) => ({
+            key,
+            title: TRIGGER_OPTIONS[key].title,
+            hint: TRIGGER_OPTIONS[key].hint,
+          }))
+        : [];
+
   return (
     <section aria-labelledby="trigger-title" className="space-y-4">
       <SectionTitle number={1} id="trigger-title" title="¿Cuándo debe empezar?">
         Elige el momento en que esta automatización se pone en marcha.
       </SectionTitle>
 
+      {status === 'loading' && triggers.length === 0 && (
+        <p className="text-sm text-muted-dark">Cargando los disparadores…</p>
+      )}
+
+      {status === 'error' && error && (
+        <p className="text-sm text-rose-700">
+          {error}{' '}
+          <button type="button" onClick={() => load()} className="font-semibold underline">
+            Reintentar
+          </button>
+        </p>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {(Object.keys(TRIGGER_OPTIONS) as TriggerType[]).map((type) => {
-          const option = TRIGGER_OPTIONS[type];
-          const selected = recipe.trigger.type === type;
+        {options.map((option) => {
+          const selected = recipe.trigger.type === option.key;
           return (
             <button
-              key={type}
+              key={option.key}
               type="button"
               aria-pressed={selected}
-              onClick={() => selectTrigger(type)}
+              onClick={() => selectTrigger(option.key)}
               className={`text-left p-4 rounded-xl border-2 transition ${
                 selected
                   ? 'border-deep-olive bg-deep-olive/5'
@@ -173,11 +211,37 @@ function TriggerSection({ recipe, onChange }: RecipeEditorProps) {
                 <Zap className={`w-4 h-4 ${selected ? 'text-deep-olive' : 'text-muted-dark'}`} />
                 {option.title}
               </span>
-              <span className="block text-xs text-muted-dark mt-1">{option.hint}</span>
+              {option.hint && <span className="block text-xs text-muted-dark mt-1">{option.hint}</span>}
             </button>
           );
         })}
+
+        {!isCreating && (
+          <button
+            type="button"
+            onClick={() => setIsCreating(true)}
+            className="text-left p-4 rounded-xl border-2 border-dashed border-border-slate/50 bg-white hover:border-deep-olive hover:bg-deep-olive/5 transition"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold text-deep-olive">
+              <Sparkles className="w-4 h-4" />
+              Crear un nuevo disparador
+            </span>
+            <span className="block text-xs text-muted-dark mt-1">
+              Por ejemplo, cuando un cliente pregunta por el precio.
+            </span>
+          </button>
+        )}
       </div>
+
+      {isCreating && (
+        <CreateTriggerForm
+          onCancel={() => setIsCreating(false)}
+          onCreated={(trigger) => {
+            selectTrigger(trigger.key);
+            setIsCreating(false);
+          }}
+        />
+      )}
 
       {recipe.trigger.type === 'ORDER_STATUS_CHANGED' && (
         <label className="block max-w-sm">
@@ -481,13 +545,14 @@ function AddStepMenu({ onAdd }: { onAdd: (kind: RecipeStepKind) => void }) {
 }
 
 function SummarySection({ recipe }: { recipe: AutomationRecipe }) {
+  const triggers = useTriggersStore((state) => state.triggers);
   return (
     <section aria-labelledby="summary-title" className="p-5 rounded-xl bg-surface-light border border-border-slate/30 space-y-3">
       <h2 id="summary-title" className="text-sm font-bold text-primary-base">
         En resumen, esta automatización hará esto:
       </h2>
       <ol className="space-y-1.5 text-sm text-primary-base list-decimal list-inside">
-        <li>{describeTrigger(recipe.trigger)}…</li>
+        <li>{describeTrigger(recipe.trigger, triggers)}…</li>
         {recipe.steps.map((step) => (
           <li key={step.id}>{describeStep(step)}</li>
         ))}

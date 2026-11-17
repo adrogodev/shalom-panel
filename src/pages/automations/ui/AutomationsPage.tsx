@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { AdminLayout } from '@/widgets/layout';
 import { AlertCircle, ArrowRight, CheckCircle2, Pencil, Plus, Sparkles, X } from 'lucide-react';
-import { AUTOMATION_TEMPLATES, describeTrigger } from '@/features/automation-builder';
+import { AUTOMATION_TEMPLATES, describeTrigger, useTriggersStore } from '@/features/automation-builder';
 import { useAutomationsStore } from '../model/automations.store';
 
 export function formatLastRun(iso: string | null, now: Date = new Date()): string {
@@ -26,10 +26,14 @@ export function AutomationsPage() {
   const load = useAutomationsStore((state) => state.load);
   const toggleActive = useAutomationsStore((state) => state.toggleActive);
   const dismissNotice = useAutomationsStore((state) => state.dismissNotice);
+  const triggers = useTriggersStore((state) => state.triggers);
+  const loadTriggers = useTriggersStore((state) => state.load);
 
   useEffect(() => {
     load();
-  }, [load]);
+    // Trigger names for custom triggers; system ones have a local fallback.
+    loadTriggers();
+  }, [load, loadTriggers]);
 
   return (
     <AdminLayout>
@@ -136,7 +140,7 @@ export function AutomationsPage() {
               >
                 <div className="flex-1 space-y-1">
                   <span className="block text-xs font-medium text-deep-olive">
-                    {describeTrigger(automation.recipe.trigger)}
+                    {describeTrigger(automation.recipe.trigger, triggers)}
                   </span>
                   <h3 className="text-base font-bold text-primary-base">{automation.name}</h3>
                   <p className="text-sm text-muted-dark">{automation.summary}</p>
