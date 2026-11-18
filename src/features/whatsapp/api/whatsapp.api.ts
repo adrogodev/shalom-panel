@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/api';
 import type {
+  AttachmentLink,
   ConversationDetail,
   InboxConversation,
   InboxMessage,
@@ -37,6 +38,14 @@ export const fetchConversationMessages = (conversationId: string) =>
 
 export const sendConversationMessage = (conversationId: string, text: string) =>
   apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/messages`, json({ text }));
+
+/** Short-lived (presigned) link to the file of a WhatsApp message; usable directly in <img>/<video>. */
+export const fetchAttachmentLink = (messageId: string, attachmentId: string) =>
+  apiClient<AttachmentLink>(`/whatsapp/messages/${enc(messageId)}/attachments/${enc(attachmentId)}`);
+
+/** WhatsApp profile photo of a customer; `url` is null when hidden or unavailable. */
+export const fetchProfilePicture = (customerId: string) =>
+  apiClient<{ url: string | null }>(`/whatsapp/customers/${enc(customerId)}/profile-picture`);
 
 export const searchProducts = async (search: string) => {
   const page = await apiClient<{ items: ProductOption[] }>(

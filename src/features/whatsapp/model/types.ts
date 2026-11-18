@@ -29,15 +29,63 @@ export interface InboxCustomer {
   tags?: { tag: { id: string; name: string } }[];
 }
 
+export type MessageType =
+  | 'TEXT'
+  | 'IMAGE'
+  | 'AUDIO'
+  | 'DOCUMENT'
+  | 'LOCATION'
+  | 'VIDEO'
+  | 'STICKER'
+  | 'CONTACT'
+  | 'REACTION'
+  | 'POLL'
+  | 'OTHER';
+
+/** AVAILABLE: stored and viewable; MISSING: could not be saved; TOO_LARGE: above the server size cap. */
+export type AttachmentStatus = 'AVAILABLE' | 'MISSING' | 'TOO_LARGE';
+
+export interface MessageAttachment {
+  id: string;
+  messageId: string;
+  mimeType: string;
+  fileName: string | null;
+  fileSize: number | null;
+  status: AttachmentStatus;
+  width?: number | null;
+  height?: number | null;
+  durationSeconds?: number | null;
+  isAnimated: boolean;
+  isVoiceNote: boolean;
+}
+
+/** Structured data the server keeps for non-file kinds (see the server WhatsAppMessageParser). */
+export interface MessageMetadata {
+  viewOnce?: boolean;
+  location?: { latitude: number; longitude: number; name?: string; address?: string; live?: boolean };
+  contacts?: { name: string; phone?: string }[];
+  poll?: { question: string; options: string[]; selectableCount?: number };
+  reaction?: { emoji: string; targetProviderMessageId: string | null; targetMessageId?: string };
+}
+
+export interface AttachmentLink {
+  url: string;
+  mimeType: string;
+  fileName: string;
+  expiresInSeconds?: number;
+}
+
 export interface InboxMessage {
   id: string;
   conversationId: string;
   providerMessageId?: string | null;
   senderType: 'CUSTOMER' | 'AGENT' | 'SYSTEM' | 'BOT';
-  messageType?: string;
+  messageType?: MessageType | string;
   content: string;
   status: MessageStatus;
   timestamp: string;
+  metadata?: MessageMetadata | null;
+  attachments?: MessageAttachment[];
 }
 
 export interface InboxConversation {

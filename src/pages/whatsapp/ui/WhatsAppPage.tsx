@@ -19,8 +19,10 @@ import {
   X,
 } from 'lucide-react';
 import {
+  MessageContent,
   WhatsAppConnectionCard,
   connectRealtime,
+  isBareMessage,
   customerName,
   customerPhone,
   useWhatsAppInstance,
@@ -48,8 +50,11 @@ function formatTime(iso?: string) {
     : date.toLocaleDateString([], { day: '2-digit', month: 'short' });
 }
 
+/** Adds a message, or updates it when the server sends it again (e.g. once its file is stored). */
 const upsertById = (list: InboxMessage[], message: InboxMessage) =>
-  list.some((m) => m.id === message.id) ? list : [...list, message];
+  list.some((m) => m.id === message.id)
+    ? list.map((m) => (m.id === message.id ? { ...m, ...message } : m))
+    : [...list, message];
 
 const initial = (conv: InboxConversation) => (customerName(conv.customer) || '?').charAt(0).toUpperCase();
 
@@ -92,11 +97,14 @@ export function WhatsAppPage() {
       const current = prev.find((c) => c.id === conversationId);
       if (!current) return prev;
       known = true;
+      // The same message arrives again once its file is stored: update it without counting it twice.
+      const repeated = current.messages?.[0]?.id === message.id;
+      const countsAsUnread = message.senderType === 'CUSTOMER' && message.messageType !== 'REACTION' && !repeated;
       const updated: InboxConversation = {
         ...current,
         lastMessageAt: message.timestamp,
         messages: [message],
-        unreadCount: isOpen ? 0 : current.unreadCount + (message.senderType === 'CUSTOMER' ? 1 : 0),
+        unreadCount: isOpen ? 0 : current.unreadCount + (countsAsUnread ? 1 : 0),
       };
       return [updated, ...prev.filter((c) => c.id !== conversationId)];
     });
@@ -360,19 +368,24 @@ export function WhatsAppPage() {
                 )}
                 {messages.map((msg) => {
                   const isAgent = msg.senderType !== 'CUSTOMER';
+                  const bare = isBareMessage(msg);
                   return (
                     <div key={msg.id} className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
                       <div
-                        className={`max-w-md rounded-2xl p-3.5 text-xs shadow-sm leading-relaxed whitespace-pre-wrap break-words ${
-                          isAgent
-                            ? 'bg-primary-base text-white rounded-br-xs'
-                            : 'bg-white text-primary-base border border-border-slate/20 rounded-bl-xs'
+                        className={`max-w-md text-xs leading-relaxed whitespace-pre-wrap break-words ${
+                          bare
+                            ? 'p-1'
+                            : `rounded-2xl p-3.5 shadow-sm ${
+                                isAgent
+                                  ? 'bg-primary-base text-white rounded-br-xs'
+                                  : 'bg-white text-primary-base border border-border-slate/20 rounded-bl-xs'
+                              }`
                         }`}
                       >
-                        <p>{msg.content}</p>
+                        <MessageContent message={msg} isAgent={isAgent && !bare} />
                         <div
                           className={`flex items-center justify-end gap-1 text-[10px] mt-1.5 ${
-                            isAgent ? 'text-surface-light/60' : 'text-muted-dark'
+                            isAgent && !bare ? 'text-surface-light/60' : 'text-muted-dark'
                           }`}
                         >
                           <span>{formatTime(msg.timestamp)}</span>
