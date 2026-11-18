@@ -30,6 +30,7 @@ import {
   type InboxConversation,
   type InboxMessage,
 } from '@/features/whatsapp';
+import { CustomerProfilePanel } from '@/features/customer-profile';
 import { QuickOrderModal } from './QuickOrderModal';
 
 type LoadState = 'loading' | 'ready' | 'error';
@@ -458,70 +459,12 @@ export function WhatsAppPage() {
 
         {/* COLUMNA 3: PERFIL DEL CLIENTE */}
         {activeConv && isProfileOpen && (
-          <aside className="w-80 border-l border-border-slate/30 bg-white p-5 flex-col justify-between overflow-y-auto hidden lg:flex">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-primary-base">Perfil del Cliente</h3>
-                  <p className="text-xs text-muted-dark">Datos consolidados del comprador</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsProfileOpen(false)}
-                  title="Cerrar perfil"
-                  className="p-1.5 text-muted-dark hover:text-primary-base hover:bg-surface-light rounded-lg transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="p-4 bg-surface-light rounded-xl border border-border-slate/20 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-deep-olive/20 text-deep-olive font-bold text-base flex items-center justify-center">
-                    {initial(activeConv)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xs text-primary-base">{activeName}</h4>
-                    <div className="text-xs font-mono text-muted-dark">{customerPhone(activeConv.customer)}</div>
-                  </div>
-                </div>
-
-                {!!activeConv.customer.tags?.length && (
-                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border-slate/20">
-                    {activeConv.customer.tags.map(({ tag }) => (
-                      <span
-                        key={tag.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-deep-olive/10 text-deep-olive"
-                      >
-                        <Tag className="w-2.5 h-2.5" />
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
-                  <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Pedidos</span>
-                  <div className="text-base font-bold text-primary-base mt-0.5">{activeConv.customer.totalOrders ?? 0}</div>
-                </div>
-                <div className="p-3 bg-white border border-border-slate/30 rounded-lg">
-                  <span className="text-[10px] uppercase font-bold text-muted-dark tracking-wider">Total Gastado</span>
-                  <div className="text-sm font-bold text-emerald-700 mt-0.5">
-                    {formatCOP(Number(activeConv.customer.totalSpent ?? 0))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-primary-base flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-muted-dark" />
-                  Última actividad
-                </span>
-                <p className="text-xs text-muted-dark leading-relaxed">{formatTime(activeConv.lastMessageAt) || 'Sin actividad registrada'}</p>
-              </div>
-            </div>
+          <aside className="w-80 border-l border-border-slate/30 bg-white overflow-y-auto scrollbar-hidden hidden lg:flex flex-col">
+            <CustomerProfilePanel
+              customerId={activeConv.customerId}
+              onClose={() => setIsProfileOpen(false)}
+              refreshKey={activeConv.lastMessageAt ?? undefined}
+            />
           </aside>
         )}
 
