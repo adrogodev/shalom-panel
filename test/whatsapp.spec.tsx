@@ -134,6 +134,27 @@ describe('WhatsApp page', () => {
     expect(await screen.findAllByText('Sí, tenemos talla M')).not.toHaveLength(0);
   });
 
+  it('shows "Número oculto por WhatsApp" for a customer known only by LID', async () => {
+    const paula: InboxConversation = {
+      ...laura,
+      id: 'conv-lid',
+      customerId: 'cust-lid',
+      externalChatJid: '211234567890123@lid',
+      customer: { id: 'cust-lid', firstName: 'Paula', lastName: 'Diaz', phone: null, totalOrders: 0, totalSpent: '0' },
+    };
+    m.fetchConversations.mockResolvedValue([paula]);
+    m.fetchConversationMessages.mockResolvedValue({ conversation: paula, messages: [] });
+    render(<WhatsAppPage />);
+
+    const list = await screen.findByRole('list', { name: 'Conversaciones' });
+    expect(within(list).getByText('Número oculto por WhatsApp')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText(/Buscar/), { target: { value: 'paula' } });
+    fireEvent.click(within(list).getByText('Paula Diaz'));
+
+    await waitFor(() => expect(screen.getAllByText('Número oculto por WhatsApp').length).toBeGreaterThan(1));
+  });
+
   it('shows a plain error when a message cannot be sent', async () => {
     m.fetchConversations.mockResolvedValue([laura]);
     m.sendConversationMessage.mockRejectedValue(new Error('Evolution API respondió con error (400)'));

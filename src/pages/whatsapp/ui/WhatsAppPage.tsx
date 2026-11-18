@@ -22,6 +22,7 @@ import {
   WhatsAppConnectionCard,
   connectRealtime,
   customerName,
+  customerPhone,
   useWhatsAppInstance,
   whatsappApi,
   type InboxConversation,
@@ -169,7 +170,7 @@ export function WhatsAppPage() {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return conversations;
     return conversations.filter(
-      (c) => customerName(c.customer).toLowerCase().includes(q) || c.customer.phone.includes(q),
+      (c) => customerName(c.customer).toLowerCase().includes(q) || (c.customer.phone ?? '').includes(q),
     );
   }, [conversations, searchQuery]);
 
@@ -270,7 +271,7 @@ export function WhatsAppPage() {
                             {formatTime(preview?.timestamp ?? conv.lastMessageAt)}
                           </span>
                         </div>
-                        <div className="text-[11px] font-mono text-muted-dark truncate">{conv.customer.phone}</div>
+                        <div className="text-[11px] font-mono text-muted-dark truncate">{customerPhone(conv.customer)}</div>
                         <p className="text-xs text-muted-dark truncate mt-0.5">
                           {preview ? `${preview.senderType === 'CUSTOMER' ? '' : 'Tú: '}${preview.content}` : 'Sin mensajes todavía'}
                         </p>
@@ -306,7 +307,7 @@ export function WhatsAppPage() {
                   <div>
                     <h3 className="font-bold text-sm text-primary-base">{activeName}</h3>
                     <div className="flex items-center gap-2 text-xs text-muted-dark font-mono">
-                      <span>{activeConv.customer.phone}</span>
+                      <span>{customerPhone(activeConv.customer)}</span>
                       <span className={`inline-block w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-active-green' : 'bg-muted-dark'}`} />
                       <span className={`text-[11px] font-sans font-medium ${isConnected ? 'text-active-green' : 'text-muted-dark'}`}>
                         {isConnected ? 'WhatsApp Conectado' : 'WhatsApp sin conectar'}
@@ -468,7 +469,7 @@ export function WhatsAppPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-xs text-primary-base">{activeName}</h4>
-                    <div className="text-xs font-mono text-muted-dark">{activeConv.customer.phone}</div>
+                    <div className="text-xs font-mono text-muted-dark">{customerPhone(activeConv.customer)}</div>
                   </div>
                 </div>
 
@@ -514,7 +515,7 @@ export function WhatsAppPage() {
         {isOrderModalOpen && activeConv && (
           <QuickOrderModal
             conversationId={activeConv.id}
-            customerLabel={`${activeName} (${activeConv.customer.phone})`}
+            customerLabel={`${activeName} (${customerPhone(activeConv.customer)})`}
             onClose={() => setIsOrderModalOpen(false)}
             onCreated={(orderNumber) => {
               setIsOrderModalOpen(false);

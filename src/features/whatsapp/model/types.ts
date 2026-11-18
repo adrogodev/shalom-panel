@@ -22,7 +22,8 @@ export interface InboxCustomer {
   id: string;
   firstName: string;
   lastName?: string | null;
-  phone: string;
+  /** Null when WhatsApp only exposes a LID (privacy identifier) for the contact. */
+  phone: string | null;
   totalOrders?: number;
   totalSpent?: number | string;
   tags?: { tag: { id: string; name: string } }[];
@@ -72,3 +73,7 @@ export interface VariantOption {
 
 export const customerName = (customer?: InboxCustomer | null) =>
   customer ? [customer.firstName, customer.lastName].filter(Boolean).join(' ') : '';
+
+export const HIDDEN_PHONE_LABEL = 'Número oculto por WhatsApp';
+
+export const customerPhone = (customer?: InboxCustomer | null) => customer?.phone || HIDDEN_PHONE_LABEL;
