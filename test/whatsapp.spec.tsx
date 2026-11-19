@@ -17,7 +17,7 @@ vi.mock('../src/features/whatsapp/api/whatsapp.api', () => ({
   searchProducts: vi.fn(),
   fetchProductVariants: vi.fn(),
   createQuickOrder: vi.fn(),
-  fetchAttachmentLink: vi.fn(),
+  fetchAttachmentFile: vi.fn(),
 }));
 
 let realtime: import('../src/features/whatsapp/lib/realtime').RealtimeHandlers = {};
@@ -216,7 +216,9 @@ describe('WhatsApp page', () => {
 
   it('replaces a message when the socket sends it again with its downloaded file', async () => {
     m.fetchConversations.mockResolvedValue([laura]);
-    m.fetchAttachmentLink.mockResolvedValue({ url: 'http://minio/signed.jpg', mimeType: 'image/jpeg', fileName: 'x.jpg' });
+    m.fetchAttachmentFile.mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }));
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:signed.jpg');
+    globalThis.URL.revokeObjectURL = vi.fn();
     render(<WhatsAppPage />);
     fireEvent.click(within(await screen.findByRole('list', { name: 'Conversaciones' })).getByText('Laura Gómez'));
     await screen.findByText('Hola Laura');
@@ -243,8 +245,8 @@ describe('WhatsApp page', () => {
       }),
     );
 
-    expect(await screen.findByRole('img', { name: 'Imagen recibida' })).toHaveAttribute('src', 'http://minio/signed.jpg');
-    expect(m.fetchAttachmentLink).toHaveBeenCalledWith('msg-10', 'att-1');
+    expect(await screen.findByRole('img', { name: 'Imagen recibida' })).toHaveAttribute('src', 'blob:signed.jpg');
+    expect(m.fetchAttachmentFile).toHaveBeenCalledWith('msg-10', 'att-1');
   });
 
   it('syncs contacts and messages, then reloads the inbox', async () => {

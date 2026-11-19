@@ -1,10 +1,8 @@
-import { apiClient } from '@/shared/api';
+import { apiClient, apiDownload } from '@/shared/api';
 import type {
-  AttachmentLink,
   ConversationDetail,
   InboxConversation,
   InboxMessage,
-  MessageAttachment,
   ProductOption,
   SyncSummary,
   VariantOption,
@@ -40,9 +38,9 @@ export const fetchConversationMessages = (conversationId: string) =>
 export const sendConversationMessage = (conversationId: string, text: string) =>
   apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/messages`, json({ text }));
 
-/** Short-lived (presigned) link to the file of a WhatsApp message; usable directly in <img>/<video>. */
-export const fetchAttachmentLink = (messageId: string, attachmentId: string) =>
-  apiClient<AttachmentLink>(`/whatsapp/messages/${enc(messageId)}/attachments/${enc(attachmentId)}`);
+/** File of a WhatsApp message; the server fetches it from Evolution API (it is not stored in the platform). */
+export const fetchAttachmentFile = async (messageId: string, attachmentId: string) =>
+  (await apiDownload(`/whatsapp/messages/${enc(messageId)}/attachments/${enc(attachmentId)}`)).blob;
 
 /** WhatsApp profile photo of a customer; `url` is null when hidden or unavailable. */
 export const fetchProfilePicture = (customerId: string) =>
@@ -91,15 +89,3 @@ export const sendConversationLocation = (
 
 export const sendConversationContact = (conversationId: string, contact: { fullName: string; phone: string }) =>
   apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/contact`, json(contact));
-
-/** Downloads again from WhatsApp a file that could not be saved; returns the updated attachment. */
-export const retryAttachment = (messageId: string, attachmentId: string) =>
-  apiClient<MessageAttachment>(
-    `/whatsapp/messages/${enc(messageId)}/attachments/${enc(attachmentId)}/retry`,
-    { method: 'POST' },
-  );
-
-export const retryMissingAttachments = () =>
-  apiClient<{ pending: number; recovered: number; unavailable: number }>('/whatsapp/attachments/retry-missing', {
-    method: 'POST',
-  });

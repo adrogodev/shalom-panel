@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 vi.mock('../src/features/whatsapp/api/whatsapp.api', () => ({
-  fetchAttachmentLink: vi.fn(),
-  retryAttachment: vi.fn(),
+  fetchAttachmentFile: vi.fn(),
   sendConversationAttachment: vi.fn(),
   sendConversationLocation: vi.fn(),
   sendConversationContact: vi.fn(),
@@ -11,7 +10,6 @@ vi.mock('../src/features/whatsapp/api/whatsapp.api', () => ({
 
 import * as api from '../src/features/whatsapp/api/whatsapp.api';
 import { ChatAttachments } from '../src/features/whatsapp/ui/ChatAttachments';
-import { MessageContent } from '../src/features/whatsapp/ui/MessageContent';
 import { kindForFile, recorderMimeType, sizeError } from '../src/features/whatsapp/lib/outgoing-media';
 import type { InboxMessage } from '../src/features/whatsapp/model/types';
 
@@ -67,7 +65,8 @@ describe('ChatAttachments', () => {
     return { onSent, onError };
   };
 
-  it('lists every kind the agent can send', () => {
+  // First render of the file loads every icon module cold; slow under the full parallel suite.
+  it('lists every kind the agent can send', { timeout: 15000 }, () => {
     renderIt();
     fireEvent.click(screen.getByLabelText('Adjuntar'));
     for (const label of ['Foto o video', 'Documento', 'Sticker', 'GIF', 'Audio', 'Ubicación', 'Contacto']) {
@@ -144,59 +143,5 @@ describe('ChatAttachments', () => {
       expect(m.sendConversationContact).toHaveBeenCalledWith('conv-1', { fullName: 'Soporte', phone: '+57 300 123 4567' }),
     );
     expect(onSent).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('MessageContent retry of a file that could not be saved', () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it('downloads it again and shows it once recovered', async () => {
-    m.retryAttachment.mockResolvedValue({
-      id: 'att-1',
-      messageId: 'msg-1',
-      mimeType: 'image/webp',
-      fileName: null,
-      fileSize: 10,
-      status: 'AVAILABLE',
-      isAnimated: false,
-      isVoiceNote: false,
-    });
-    m.fetchAttachmentLink.mockResolvedValue({ url: 'http://files/s.webp', mimeType: 'image/webp', fileName: 's.webp' });
-    render(
-      <MessageContent
-        message={{
-          ...sent,
-          id: 'msg-1',
-          senderType: 'CUSTOMER',
-          messageType: 'STICKER',
-          content: '[Sticker]',
-          attachments: [
-            { id: 'att-1', messageId: 'msg-1', mimeType: 'image/webp', fileName: null, fileSize: null, status: 'MISSING', isAnimated: false, isVoiceNote: false },
-          ],
-        }}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar descarga' }));
-    await waitFor(() => expect(m.retryAttachment).toHaveBeenCalledWith('msg-1', 'att-1'));
-    await waitFor(() => expect(m.fetchAttachmentLink).toHaveBeenCalledWith('msg-1', 'att-1'));
-    expect(screen.queryByRole('button', { name: 'Reintentar descarga' })).not.toBeInTheDocument();
-  });
-
-  it('explains why when the file still cannot be recovered', async () => {
-    m.retryAttachment.mockRejectedValue(new Error('WhatsApp ya no tiene disponible este archivo'));
-    render(
-      <MessageContent
-        message={{
-          ...sent,
-          messageType: 'IMAGE',
-          attachments: [
-            { id: 'att-1', messageId: 'msg-9', mimeType: 'image/jpeg', fileName: null, fileSize: null, status: 'MISSING', isAnimated: false, isVoiceNote: false },
-          ],
-        }}
-      />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar descarga' }));
-    expect(await screen.findByText('WhatsApp ya no tiene disponible este archivo')).toBeInTheDocument();
   });
 });

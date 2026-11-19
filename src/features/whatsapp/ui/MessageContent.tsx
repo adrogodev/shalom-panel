@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Download, Eye, FileText, Loader2, MapPin, Mic, BarChart3, UserRound, AlertCircle, Music } from 'lucide-react';
-import { fetchAttachmentLink, retryAttachment } from '../api/whatsapp.api';
+import { fetchAttachmentFile } from '../api/whatsapp.api';
 import type { InboxMessage, MessageAttachment } from '../model/types';
 
 interface MessageContentProps {
@@ -30,11 +30,14 @@ const formatDuration = (seconds?: number | null) => {
   return `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
 };
 
-type LinkState = { status: 'idle' | 'loading' | 'ready' | 'error'; url?: string };
+type LinkState = { status: 'idle' | 'loading' | 'ready' | 'error'; url?: string; error?: string };
 
-/** Asks the server for a short-lived link to a stored file (only for AVAILABLE attachments). */
+/**
+ * Downloads the file through the server (which asks Evolution API for it) and exposes it as a
+ * local object URL. Files too large to show are never requested.
+ */
 function useAttachmentUrl(messageId: string, attachment?: MessageAttachment): LinkState {
-  const attachmentId = attachment?.status === 'AVAILABLE' ? attachment.id : undefined;
+  const attachmentId = attachment && attachment.status !== 'TOO_LARGE' ? attachment.id : undefined;
   const [state, setState] = useState<LinkState>({ status: attachmentId ? 'loading' : 'idle' });
 
   useEffect(() => {
@@ -43,12 +46,18 @@ function useAttachmentUrl(messageId: string, attachment?: MessageAttachment): Li
       return;
     }
     let active = true;
+    let objectUrl: string | undefined;
     setState({ status: 'loading' });
-    fetchAttachmentLink(messageId, attachmentId)
-      .then((link) => active && setState({ status: 'ready', url: link.url }))
-      .catch(() => active && setState({ status: 'error' }));
+    fetchAttachmentFile(messageId, attachmentId)
+      .then((blob) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(blob);
+        setState({ status: 'ready', url: objectUrl });
+      })
+      .catch((err) => active && setState({ status: 'error', error: err instanceof Error ? err.message : undefined }));
     return () => {
       active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [messageId, attachmentId]);
 
@@ -64,51 +73,14 @@ function Notice({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Lets the agent download again from WhatsApp a file the server could not save. */
-function RetryNotice({ messageId, attachment, onRecovered }: {
-  messageId: string;
-  attachment: MessageAttachment;
-  onRecovered: (attachment: MessageAttachment) => void;
-}) {
-  const [state, setState] = useState<'idle' | 'retrying' | 'failed'>('idle');
-  const [detail, setDetail] = useState<string | null>(null);
-  const retry = async () => {
-    setState('retrying');
-    try {
-      const updated = await retryAttachment(messageId, attachment.id);
-      if (updated.status === 'AVAILABLE') onRecovered(updated);
-      else {
-        setState('failed');
-        setDetail(updated.status === 'TOO_LARGE' ? 'El archivo es demasiado grande para mostrarlo aquí.' : null);
-      }
-    } catch (err) {
-      setState('failed');
-      setDetail(err instanceof Error && err.message ? err.message : null);
-    }
-  };
-  return (
-    <div className="space-y-1">
-      <Notice>{detail ?? (state === 'failed' ? 'Todavía no se pudo recuperar el archivo.' : 'El archivo no se pudo guardar.')}</Notice>
-      <button
-        type="button"
-        onClick={retry}
-        disabled={state === 'retrying'}
-        className="flex items-center gap-1 text-[11px] font-semibold underline disabled:opacity-60"
-      >
-        {state === 'retrying' && <Loader2 className="w-3 h-3 animate-spin" />}
-        {state === 'retrying' ? 'Recuperando…' : 'Reintentar descarga'}
-      </button>
-    </div>
-  );
-}
-
 /** Explains why a file cannot be shown; null when the file is (or will be) viewable. */
 function unavailableNotice(attachment: MessageAttachment | undefined, link: LinkState) {
-  if (attachment?.status === 'MISSING') return <Notice>Archivo no disponible. Ábrelo en WhatsApp en tu teléfono.</Notice>;
   if (attachment?.status === 'TOO_LARGE') {
     return <Notice>Archivo demasiado grande para mostrarlo aquí. Ábrelo en WhatsApp en tu teléfono.</Notice>;
   }
-  if (link.status === 'error') return <Notice>No pudimos cargar el archivo.</Notice>;
+  if (link.status === 'error') {
+    return <Notice>{link.error || 'No pudimos cargar el archivo.'} Puedes verlo en WhatsApp en tu teléfono.</Notice>;
+  }
   if (link.status === 'loading') {
     return (
       <p className="flex items-center gap-1.5 text-[11px] opacity-70">
@@ -124,21 +96,14 @@ function Caption({ text }: { text: string }) {
 }
 
 function MediaBody({ message, isAgent }: MessageContentProps) {
-  const original = message.attachments?.[0];
-  const [recovered, setRecovered] = useState<MessageAttachment | null>(null);
-  const attachment = recovered?.id === original?.id ? recovered ?? original : original;
+  const attachment = message.attachments?.[0];
   const link = useAttachmentUrl(message.id, attachment);
   const type = message.messageType;
 
   // File still being saved by the server (or a message stored before media support).
   if (!attachment) return <p>{message.content}</p>;
 
-  const notice =
-    attachment.status === 'MISSING' ? (
-      <RetryNotice messageId={message.id} attachment={attachment} onRecovered={setRecovered} />
-    ) : (
-      unavailableNotice(attachment, link)
-    );
+  const notice = unavailableNotice(attachment, link);
   const url = link.status === 'ready' ? link.url : undefined;
 
   if (type === 'DOCUMENT') {

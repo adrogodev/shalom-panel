@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 vi.mock('../src/features/whatsapp/api/whatsapp.api', () => ({
-  fetchAttachmentLink: vi.fn(),
-  retryAttachment: vi.fn(),
+  fetchAttachmentFile: vi.fn(),
 }));
 
 import { MessageContent, isBareMessage } from '../src/features/whatsapp/ui/MessageContent';
@@ -35,18 +34,20 @@ const message = (over: Partial<InboxMessage> = {}): InboxMessage => ({
   ...over,
 });
 
-const URL_OF = 'http://localhost:9000/shalom-private/whatsapp/x?X-Amz-Signature=abc';
+const URL_OF = 'blob:http://localhost:3000/whatsapp-file';
 
 describe('MessageContent (every WhatsApp kind in the chat bubble)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.fetchAttachmentLink.mockResolvedValue({ url: URL_OF, mimeType: 'image/jpeg', fileName: 'x.jpg' });
+    m.fetchAttachmentFile.mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }));
+    globalThis.URL.createObjectURL = vi.fn(() => URL_OF);
+    globalThis.URL.revokeObjectURL = vi.fn();
   });
 
   it('renders plain text', () => {
     render(<MessageContent message={message({ content: '¿Tienen talla M?' })} />);
     expect(screen.getByText('¿Tienen talla M?')).toBeInTheDocument();
-    expect(m.fetchAttachmentLink).not.toHaveBeenCalled();
+    expect(m.fetchAttachmentFile).not.toHaveBeenCalled();
   });
 
   it('renders an image through a short-lived link with its caption, and opens it full size on click', async () => {
@@ -54,7 +55,7 @@ describe('MessageContent (every WhatsApp kind in the chat bubble)', () => {
     render(<MessageContent message={message({ messageType: 'IMAGE', content: 'Esta camiseta', attachments: [attachment()] })} />);
 
     const img = await screen.findByRole('img', { name: 'Imagen recibida' });
-    expect(m.fetchAttachmentLink).toHaveBeenCalledWith('msg-1', 'att-1');
+    expect(m.fetchAttachmentFile).toHaveBeenCalledWith('msg-1', 'att-1');
     expect(img).toHaveAttribute('src', URL_OF);
     expect(screen.getByText('Esta camiseta')).toBeInTheDocument();
 
@@ -114,7 +115,7 @@ describe('MessageContent (every WhatsApp kind in the chat bubble)', () => {
   });
 
   it('renders a document with its name, size and a download link', async () => {
-    m.fetchAttachmentLink.mockResolvedValue({ url: URL_OF, mimeType: 'application/pdf', fileName: 'cotizacion.pdf' });
+    m.fetchAttachmentFile.mockResolvedValue(new Blob(['%PDF'], { type: 'application/pdf' }));
     render(
       <MessageContent
         message={message({
@@ -186,26 +187,31 @@ describe('MessageContent (every WhatsApp kind in the chat bubble)', () => {
     expect(screen.getByText(/Este tipo de mensaje no se puede mostrar aquí/)).toBeInTheDocument();
   });
 
-  it('explains when the file could not be saved or is too large, without asking for a link', () => {
+  it('explains a file too large to show without requesting it', () => {
     render(
-      <>
-        <MessageContent message={message({ id: 'a', messageType: 'IMAGE', content: '[Imagen]', attachments: [attachment({ status: 'MISSING' })] })} />
-        <MessageContent message={message({ id: 'b', messageType: 'VIDEO', content: '[Video]', attachments: [attachment({ status: 'TOO_LARGE' })] })} />
-      </>,
+      <MessageContent message={message({ id: 'b', messageType: 'VIDEO', content: '[Video]', attachments: [attachment({ status: 'TOO_LARGE' })] })} />,
     );
-    expect(screen.getByText('El archivo no se pudo guardar.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reintentar descarga' })).toBeInTheDocument();
     expect(screen.getByText('Archivo demasiado grande para mostrarlo aquí. Ábrelo en WhatsApp en tu teléfono.')).toBeInTheDocument();
-    expect(m.fetchAttachmentLink).not.toHaveBeenCalled();
+    expect(m.fetchAttachmentFile).not.toHaveBeenCalled();
+  });
+
+  it('requests from WhatsApp also the files older versions marked as missing', async () => {
+    render(
+      <MessageContent message={message({ messageType: 'STICKER', content: '[Sticker]', attachments: [attachment({ status: 'MISSING', mimeType: 'image/webp' })] })} />,
+    );
+    expect(await screen.findByRole('img', { name: 'Sticker' })).toHaveAttribute('src', URL_OF);
+    expect(m.fetchAttachmentFile).toHaveBeenCalledWith('msg-1', 'att-1');
   });
 
   it('shows the placeholder while the file is still being saved and a notice when the link fails', async () => {
     const { rerender } = render(<MessageContent message={message({ messageType: 'IMAGE', content: '[Imagen]' })} />);
     expect(screen.getByText('[Imagen]')).toBeInTheDocument();
 
-    m.fetchAttachmentLink.mockRejectedValue(new Error('404'));
+    m.fetchAttachmentFile.mockRejectedValue(new Error('WhatsApp ya no tiene disponible este archivo'));
     rerender(<MessageContent message={message({ messageType: 'IMAGE', content: '[Imagen]', attachments: [attachment()] })} />);
-    expect(await screen.findByText('No pudimos cargar el archivo.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('WhatsApp ya no tiene disponible este archivo Puedes verlo en WhatsApp en tu teléfono.'),
+    ).toBeInTheDocument();
   });
 
   it('marks view-once messages', () => {
