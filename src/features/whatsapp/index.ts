@@ -4,3 +4,4 @@ export { connectRealtime, realtimeUrl, type RealtimeHandlers } from './lib/realt
 export { useWhatsAppInstance, STATUS_POLL_MS } from './model/useWhatsAppInstance';
 export { WhatsAppConnectionCard } from './ui/WhatsAppConnectionCard';
 export { MessageContent, isBareMessage, formatFileSize } from './ui/MessageContent';
+export { ChatAttachments } from './ui/ChatAttachments';

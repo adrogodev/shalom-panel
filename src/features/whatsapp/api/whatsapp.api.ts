@@ -4,6 +4,7 @@ import type {
   ConversationDetail,
   InboxConversation,
   InboxMessage,
+  MessageAttachment,
   ProductOption,
   SyncSummary,
   VariantOption,
@@ -67,3 +68,38 @@ export const createQuickOrder = (
     `/whatsapp/conversations/${enc(conversationId)}/quick-order`,
     json(body),
   );
+
+export type OutgoingMediaKind = 'image' | 'video' | 'gif' | 'audio' | 'voice' | 'document' | 'sticker';
+
+export interface OutgoingAttachment {
+  kind: OutgoingMediaKind;
+  /** File content in base64 (a data: URL is accepted). */
+  base64: string;
+  mimeType: string;
+  fileName: string;
+  caption?: string;
+}
+
+/** Sends a file (image, video, GIF, audio, voice note, document or sticker) to the chat. */
+export const sendConversationAttachment = (conversationId: string, attachment: OutgoingAttachment) =>
+  apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/attachments`, json(attachment));
+
+export const sendConversationLocation = (
+  conversationId: string,
+  location: { latitude: number; longitude: number; name?: string; address?: string },
+) => apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/location`, json(location));
+
+export const sendConversationContact = (conversationId: string, contact: { fullName: string; phone: string }) =>
+  apiClient<InboxMessage>(`/whatsapp/conversations/${enc(conversationId)}/contact`, json(contact));
+
+/** Downloads again from WhatsApp a file that could not be saved; returns the updated attachment. */
+export const retryAttachment = (messageId: string, attachmentId: string) =>
+  apiClient<MessageAttachment>(
+    `/whatsapp/messages/${enc(messageId)}/attachments/${enc(attachmentId)}/retry`,
+    { method: 'POST' },
+  );
+
+export const retryMissingAttachments = () =>
+  apiClient<{ pending: number; recovered: number; unavailable: number }>('/whatsapp/attachments/retry-missing', {
+    method: 'POST',
+  });

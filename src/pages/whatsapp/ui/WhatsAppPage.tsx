@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  ChatAttachments,
   MessageContent,
   WhatsAppConnectionCard,
   connectRealtime,
@@ -436,6 +437,15 @@ export function WhatsAppPage() {
                 )}
 
                 <div className="flex items-center gap-2">
+                  <ChatAttachments
+                    conversationId={activeConv.id}
+                    disabled={!isConnected}
+                    onError={setSendError}
+                    onSent={(message) => {
+                      setMessages((prev) => upsertById(prev, message));
+                      touchConversation(activeConv.id, message, true);
+                    }}
+                  />
                   <input
                     type="text"
                     placeholder="Escribe un mensaje para el cliente por WhatsApp..."

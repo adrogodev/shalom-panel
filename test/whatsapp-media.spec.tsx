@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 vi.mock('../src/features/whatsapp/api/whatsapp.api', () => ({
   fetchAttachmentLink: vi.fn(),
+  retryAttachment: vi.fn(),
 }));
 
 import { MessageContent, isBareMessage } from '../src/features/whatsapp/ui/MessageContent';
@@ -192,7 +193,8 @@ describe('MessageContent (every WhatsApp kind in the chat bubble)', () => {
         <MessageContent message={message({ id: 'b', messageType: 'VIDEO', content: '[Video]', attachments: [attachment({ status: 'TOO_LARGE' })] })} />
       </>,
     );
-    expect(screen.getByText('Archivo no disponible. Ábrelo en WhatsApp en tu teléfono.')).toBeInTheDocument();
+    expect(screen.getByText('El archivo no se pudo guardar.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reintentar descarga' })).toBeInTheDocument();
     expect(screen.getByText('Archivo demasiado grande para mostrarlo aquí. Ábrelo en WhatsApp en tu teléfono.')).toBeInTheDocument();
     expect(m.fetchAttachmentLink).not.toHaveBeenCalled();
   });

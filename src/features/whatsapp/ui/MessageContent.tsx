@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Download, Eye, FileText, Loader2, MapPin, Mic, BarChart3, UserRound, AlertCircle, Music } from 'lucide-react';
-import { fetchAttachmentLink } from '../api/whatsapp.api';
+import { fetchAttachmentLink, retryAttachment } from '../api/whatsapp.api';
 import type { InboxMessage, MessageAttachment } from '../model/types';
 
 interface MessageContentProps {
@@ -64,6 +64,44 @@ function Notice({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Lets the agent download again from WhatsApp a file the server could not save. */
+function RetryNotice({ messageId, attachment, onRecovered }: {
+  messageId: string;
+  attachment: MessageAttachment;
+  onRecovered: (attachment: MessageAttachment) => void;
+}) {
+  const [state, setState] = useState<'idle' | 'retrying' | 'failed'>('idle');
+  const [detail, setDetail] = useState<string | null>(null);
+  const retry = async () => {
+    setState('retrying');
+    try {
+      const updated = await retryAttachment(messageId, attachment.id);
+      if (updated.status === 'AVAILABLE') onRecovered(updated);
+      else {
+        setState('failed');
+        setDetail(updated.status === 'TOO_LARGE' ? 'El archivo es demasiado grande para mostrarlo aquí.' : null);
+      }
+    } catch (err) {
+      setState('failed');
+      setDetail(err instanceof Error && err.message ? err.message : null);
+    }
+  };
+  return (
+    <div className="space-y-1">
+      <Notice>{detail ?? (state === 'failed' ? 'Todavía no se pudo recuperar el archivo.' : 'El archivo no se pudo guardar.')}</Notice>
+      <button
+        type="button"
+        onClick={retry}
+        disabled={state === 'retrying'}
+        className="flex items-center gap-1 text-[11px] font-semibold underline disabled:opacity-60"
+      >
+        {state === 'retrying' && <Loader2 className="w-3 h-3 animate-spin" />}
+        {state === 'retrying' ? 'Recuperando…' : 'Reintentar descarga'}
+      </button>
+    </div>
+  );
+}
+
 /** Explains why a file cannot be shown; null when the file is (or will be) viewable. */
 function unavailableNotice(attachment: MessageAttachment | undefined, link: LinkState) {
   if (attachment?.status === 'MISSING') return <Notice>Archivo no disponible. Ábrelo en WhatsApp en tu teléfono.</Notice>;
@@ -86,14 +124,21 @@ function Caption({ text }: { text: string }) {
 }
 
 function MediaBody({ message, isAgent }: MessageContentProps) {
-  const attachment = message.attachments?.[0];
+  const original = message.attachments?.[0];
+  const [recovered, setRecovered] = useState<MessageAttachment | null>(null);
+  const attachment = recovered?.id === original?.id ? recovered ?? original : original;
   const link = useAttachmentUrl(message.id, attachment);
   const type = message.messageType;
 
   // File still being saved by the server (or a message stored before media support).
   if (!attachment) return <p>{message.content}</p>;
 
-  const notice = unavailableNotice(attachment, link);
+  const notice =
+    attachment.status === 'MISSING' ? (
+      <RetryNotice messageId={message.id} attachment={attachment} onRecovered={setRecovered} />
+    ) : (
+      unavailableNotice(attachment, link)
+    );
   const url = link.status === 'ready' ? link.url : undefined;
 
   if (type === 'DOCUMENT') {
